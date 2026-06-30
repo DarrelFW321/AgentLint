@@ -1,0 +1,149 @@
+# AgentLint Research Note
+
+This document records research findings, design decisions, limitations, open questions, and experimental results for AgentLint. The working assumption is that this project may later become an arXiv note or research paper, so entries should preserve enough context to support a clear technical narrative.
+
+## Working Title
+
+AgentLint: Policy Checking for Tool-Using AI Agent Execution Traces
+
+## Research Framing
+
+AgentLint studies how recorded AI agent executions can be normalized into a common intermediate representation and checked against developer-defined policies for tool use, data flow, approval requirements, and final-answer provenance.
+
+The project is not framed as proving general agent safety. It is framed as verifying concrete, policy-relevant properties over specific recorded or in-progress executions.
+
+## Core Hypothesis
+
+Tool-using AI agent executions can be treated as analyzable traces. By translating heterogeneous trace formats into a common intermediate representation, we can apply compiler-inspired validation, data-flow analysis, provenance checking, and policy evaluation to detect meaningful safety and correctness violations before deployment.
+
+## Proposed Contribution
+
+1. A trace-oriented intermediate representation for tool-using AI agent executions.
+2. A compiler-style analysis pipeline for importing, normalizing, enriching, and checking traces.
+3. A policy model for expressing tool permissions, data-handling constraints, approval requirements, and provenance requirements.
+4. A set of concrete violation categories relevant to agent safety engineering.
+5. An implementation that produces CI-compatible diagnostics over realistic traces.
+6. Case studies or examples showing detected failures in representative agent workflows.
+
+## Current Design Direction
+
+AgentLint should use a compiler-inspired pipeline:
+
+```text
+raw traces
+  -> adapters
+  -> schema validation
+  -> AgentLint intermediate representation
+  -> enrichment passes
+  -> analysis passes
+  -> policy evaluation
+  -> diagnostics and reports
+```
+
+The intermediate representation should be graph-shaped rather than only sequential. Event order, data dependencies, approval links, and provenance links are distinct relationships and should be represented explicitly.
+
+## Candidate Analyses
+
+### Structural Validation
+
+- Duplicate event identifiers.
+- Missing references.
+- Tool results without matching tool calls.
+- Tool calls with missing arguments.
+- Invalid event ordering.
+- Final answers referencing nonexistent evidence.
+
+### Tool Policy Checking
+
+- Unauthorized tool calls.
+- Unknown tools not covered by policy.
+- High-risk tools called without required approval.
+- Tool calls made after explicit denial.
+- Tool arguments violating configured constraints.
+
+### Data-Flow Checking
+
+- Private data flowing into public tools.
+- Secret data entering model-visible context.
+- Untrusted content influencing privileged actions.
+- Sensitive data appearing in final answers when disallowed.
+- Missing sensitivity labels for policy-relevant values.
+
+### Provenance Checking
+
+- Final-answer claims without supporting evidence.
+- Claims pointing to nonexistent evidence.
+- Evidence occurring after the claim.
+- Evidence that is structurally incompatible with the claim.
+- Contradictions between final answers and tool results where detectable.
+
+## Known Limitations
+
+These limitations should be tracked honestly and refined as the implementation develops.
+
+1. AgentLint checks concrete executions, not all possible future executions.
+2. The quality of analysis depends on the completeness and fidelity of the trace.
+3. Data-flow precision may be limited when traces contain only natural-language strings rather than structured value references.
+4. Provenance checking is difficult without explicit claim-to-evidence annotations.
+5. Semantic contradiction detection may require model-assisted or domain-specific methods, which should not be assumed trustworthy by default.
+6. Trace adapters may lose information when source frameworks expose incomplete or inconsistent metadata.
+7. Policy results are only as strong as the policies developers define.
+8. Runtime gating introduces latency, partial-information, and reliability constraints not present in offline analysis.
+
+## Open Questions
+
+1. What is the minimal intermediate representation that supports useful V1 checks without overfitting to one tracing framework?
+2. Should the policy language remain a purpose-built YAML DSL, or should AgentLint support a logic language such as Rego or Datalog?
+3. How should AgentLint represent uncertain or inferred data-flow edges?
+4. What diagnostics make trace policy violations most actionable for developers?
+5. Which external adapter should be implemented first for the strongest demonstration?
+6. How should sensitive values be redacted while preserving useful debugging context?
+7. What benchmark traces or case studies would best demonstrate practical value?
+
+## Evaluation Ideas
+
+Possible evaluation dimensions:
+
+1. Ability to import realistic traces from at least one external system.
+2. Number and clarity of detected policy violations across curated failure scenarios.
+3. False positive and false negative behavior on hand-labeled traces.
+4. Runtime overhead for offline CI analysis.
+5. Diagnostic usefulness in developer review.
+6. Extensibility of the IR and policy system when adding a new adapter or rule.
+
+Candidate case studies:
+
+1. Customer-support agent leaking private account data into a public web search.
+2. Email agent sending a message without approval.
+3. Research agent making unsupported claims in a final answer.
+4. Browser agent taking privileged action based on untrusted web content.
+5. Coding agent exposing repository secrets in a model-visible or public context.
+
+## Paper Outline Draft
+
+1. Introduction
+2. Background and Motivation
+3. Problem Statement
+4. Agent Execution Trace Model
+5. AgentLint Intermediate Representation
+6. Policy Language and Violation Model
+7. Analysis Pipeline
+8. Implementation
+9. Case Studies or Evaluation
+10. Limitations
+11. Related Work
+12. Conclusion
+
+## Findings Log
+
+Use this section to add dated findings as the project develops.
+
+### 2026-06-30
+
+- Initial product framing: AgentLint is a CI linter for AI agent traces.
+- Initial technical framing: a compiler-style trace analysis pipeline appears appropriate.
+- Important distinction: event order, data flow, approvals, and provenance should be modeled as separate relationships over a shared trace graph.
+- Roadmap decision: V1 should use a purpose-built YAML policy DSL and built-in analysis engine. OPA/Rego should be evaluated later as an optional backend over exported AgentLint facts, after the IR and diagnostics are stable.
+- Milestone 0 planning decision: start with a minimal Python package, Typer CLI, pytest smoke tests, example directories, architecture note, glossary, and research baseline. Defer IR models and real trace validation to Milestone 1.
+- Milestone 0 R0 research decision: use `uv`, `pyproject.toml`, Python 3.12+, `src/` layout, Typer, pytest, Pydantic, PyYAML, Rich, and Ruff. Add `src/agentlint/__main__.py` so `python -m agentlint` works as a fallback. Defer strict type-checker selection until after the first schemas exist.
+- Milestone 0 build baseline: created the initial Python package skeleton, minimal CLI, smoke tests, example directories, architecture note, and glossary. Verification passed on Python 3.12.10 via `py -3.12 -m agentlint`, `py -3.12 -m pytest`, and Ruff. Local environment caveat: default `python` is 3.11.4, and the Python 3.12 user scripts directory is not on `PATH`; `uv` is installed and currently works through `py -3.12 -m uv`.
