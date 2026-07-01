@@ -1,0 +1,16 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_minimal_valid",
+  "metadata": {
+    "scenario": "minimal"
+  },
+  "events": [
+    {
+      "id": "evt_user_1",
+      "type": "user_message",
+      "sequence": 0,
+      "content": "Summarize the account status."
+    }
+  ],
+  "edges": []
+}

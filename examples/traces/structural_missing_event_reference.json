@@ -1,0 +1,23 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_structural_missing_event_reference",
+  "metadata": {
+    "scenario": "structural_missing_event_reference"
+  },
+  "events": [
+    {
+      "id": "evt_user_1",
+      "type": "user_message",
+      "sequence": 0,
+      "content": "Hello."
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_missing",
+      "type": "data_flow",
+      "from_event": "evt_missing",
+      "to_event": "evt_user_1"
+    }
+  ]
+}

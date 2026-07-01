@@ -1,0 +1,97 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_structural_valid_tool_flow",
+  "metadata": {
+    "scenario": "structural_valid_tool_flow",
+    "synthetic": true
+  },
+  "events": [
+    {
+      "id": "evt_user_1",
+      "type": "user_message",
+      "sequence": 0,
+      "content": "What is the status of account A-100?"
+    },
+    {
+      "id": "evt_model_1",
+      "type": "model_call",
+      "sequence": 1,
+      "model": "example-model",
+      "input": {
+        "messages": [
+          "What is the status of account A-100?"
+        ]
+      },
+      "output": {
+        "tool_request": "lookup_account"
+      }
+    },
+    {
+      "id": "evt_tool_call_1",
+      "type": "tool_call",
+      "sequence": 2,
+      "tool_name": "lookup_account",
+      "arguments": {
+        "account_id": "A-100"
+      }
+    },
+    {
+      "id": "evt_tool_result_1",
+      "type": "tool_result",
+      "sequence": 3,
+      "tool_name": "lookup_account",
+      "call_id": "evt_tool_call_1",
+      "result": {
+        "account_id": "A-100",
+        "status": "active"
+      }
+    },
+    {
+      "id": "evt_final_1",
+      "type": "final_answer",
+      "sequence": 4,
+      "content": "Account A-100 is active.",
+      "claims": [
+        {
+          "id": "claim_1",
+          "text": "Account A-100 is active.",
+          "evidence": [
+            "evt_tool_result_1"
+          ]
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_parent_1",
+      "type": "parent",
+      "from_event": "evt_user_1",
+      "to_event": "evt_model_1"
+    },
+    {
+      "id": "edge_parent_2",
+      "type": "parent",
+      "from_event": "evt_model_1",
+      "to_event": "evt_tool_call_1"
+    },
+    {
+      "id": "edge_parent_3",
+      "type": "parent",
+      "from_event": "evt_tool_call_1",
+      "to_event": "evt_tool_result_1"
+    },
+    {
+      "id": "edge_data_1",
+      "type": "data_flow",
+      "from_event": "evt_tool_result_1",
+      "to_event": "evt_final_1"
+    },
+    {
+      "id": "edge_provenance_1",
+      "type": "provenance",
+      "from_event": "evt_tool_result_1",
+      "to_event": "evt_final_1"
+    }
+  ]
+}

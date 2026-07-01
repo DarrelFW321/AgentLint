@@ -1,0 +1,16 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_structural_tool_call_missing_arguments",
+  "metadata": {
+    "scenario": "structural_tool_call_missing_arguments"
+  },
+  "events": [
+    {
+      "id": "evt_tool_call_1",
+      "type": "tool_call",
+      "sequence": 0,
+      "tool_name": "lookup_account"
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_structural_duplicate_event_id",
+  "metadata": {
+    "scenario": "structural_duplicate_event_id"
+  },
+  "events": [
+    {
+      "id": "evt_duplicate",
+      "type": "user_message",
+      "sequence": 0,
+      "content": "Hello."
+    },
+    {
+      "id": "evt_duplicate",
+      "type": "final_answer",
+      "sequence": 1,
+      "content": "Hello."
+    }
+  ],
+  "edges": []
+}

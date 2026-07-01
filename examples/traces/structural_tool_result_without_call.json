@@ -1,0 +1,19 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_structural_tool_result_without_call",
+  "metadata": {
+    "scenario": "structural_tool_result_without_call"
+  },
+  "events": [
+    {
+      "id": "evt_tool_result_1",
+      "type": "tool_result",
+      "sequence": 0,
+      "tool_name": "lookup_account",
+      "result": {
+        "status": "active"
+      }
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_structural_invalid_evidence_reference",
+  "metadata": {
+    "scenario": "structural_invalid_evidence_reference"
+  },
+  "events": [
+    {
+      "id": "evt_final_1",
+      "type": "final_answer",
+      "sequence": 0,
+      "content": "Account A-100 is active.",
+      "claims": [
+        {
+          "id": "claim_1",
+          "text": "Account A-100 is active.",
+          "evidence": [
+            "evt_missing"
+          ]
+        }
+      ]
+    }
+  ],
+  "edges": []
+}

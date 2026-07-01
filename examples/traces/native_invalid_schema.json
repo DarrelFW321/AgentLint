@@ -1,0 +1,13 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_invalid_schema",
+  "metadata": {},
+  "events": [
+    {
+      "id": "evt_user_1",
+      "type": "user_message",
+      "sequence": "0"
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_invalid_missing_event_ref",
+  "metadata": {},
+  "events": [
+    {
+      "id": "evt_user_1",
+      "type": "user_message",
+      "sequence": 0,
+      "content": "Summarize the account status."
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_missing_1",
+      "type": "data_flow",
+      "from_event": "evt_missing",
+      "to_event": "evt_user_1"
+    }
+  ]
+}

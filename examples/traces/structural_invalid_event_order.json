@@ -1,0 +1,29 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_structural_invalid_event_order",
+  "metadata": {
+    "scenario": "structural_invalid_event_order"
+  },
+  "events": [
+    {
+      "id": "evt_early",
+      "type": "user_message",
+      "sequence": 0,
+      "content": "Hello."
+    },
+    {
+      "id": "evt_late",
+      "type": "final_answer",
+      "sequence": 1,
+      "content": "Hello."
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_backward",
+      "type": "parent",
+      "from_event": "evt_late",
+      "to_event": "evt_early"
+    }
+  ]
+}
