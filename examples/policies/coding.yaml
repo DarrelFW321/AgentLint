@@ -1,0 +1,71 @@
+version: 1
+policy_id: coding_v1
+
+metadata:
+  owner: developer-platform
+  scenario: coding_agent
+
+tools:
+  read_file:
+    permission: allowed
+    approval: not_required
+    risk: low
+    arguments:
+      path:
+        required: true
+        allowed_types:
+          - string
+  shell_command:
+    permission: allowed
+    approval: required
+    risk: high
+    arguments:
+      command:
+        required: true
+        allowed_types:
+          - string
+  network_request:
+    permission: denied
+    approval: required
+    risk: critical
+  write_file:
+    permission: allowed
+    approval: required
+    risk: high
+
+sources:
+  repository:
+    sensitivity: internal
+    trust: trusted
+  environment_secret:
+    sensitivity: secret
+    trust: trusted
+  public_package_index:
+    sensitivity: public
+    trust: untrusted
+
+sinks:
+  shell.stdin:
+    visibility: private
+  network.body:
+    visibility: public
+  final_answer:
+    visibility: model
+
+rules:
+  unknown_tool: error
+  unauthorized_tool_call: error
+  disallowed_tool_argument: error
+  missing_approval: error
+  approval_after_action: error
+  action_after_denial: error
+  approval_mismatch: error
+  private_to_public_sink: error
+  secret_exposure: error
+  untrusted_to_privileged_action: error
+  sensitive_final_answer: error
+  unsupported_claim: warning
+  invalid_provenance_reference: error
+  evidence_after_claim: warning
+
+exceptions: []

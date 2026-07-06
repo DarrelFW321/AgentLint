@@ -1,0 +1,20 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_tool_valid",
+  "metadata": {
+    "scenario": "policy_tool_valid"
+  },
+  "events": [
+    {
+      "id": "evt_lookup_account",
+      "type": "tool_call",
+      "sequence": 0,
+      "tool_name": "lookup_account",
+      "arguments": {
+        "account_id": "A-100",
+        "extra_context": true
+      }
+    }
+  ],
+  "edges": []
+}

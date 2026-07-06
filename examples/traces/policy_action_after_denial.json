@@ -1,0 +1,28 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_action_after_denial",
+  "metadata": {
+    "scenario": "policy_action_after_denial"
+  },
+  "events": [
+    {
+      "id": "evt_denial",
+      "type": "approval",
+      "sequence": 0,
+      "decision": "denied",
+      "subject_event": "evt_send_email",
+      "approved_by": "supervisor"
+    },
+    {
+      "id": "evt_send_email",
+      "type": "tool_call",
+      "sequence": 1,
+      "tool_name": "send_email",
+      "arguments": {
+        "recipient": "customer@example.com",
+        "body": "Your case has been updated."
+      }
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_disallowed_tool_argument",
+  "metadata": {
+    "scenario": "policy_disallowed_tool_argument"
+  },
+  "events": [
+    {
+      "id": "evt_lookup_account",
+      "type": "tool_call",
+      "sequence": 0,
+      "tool_name": "lookup_account",
+      "arguments": {
+        "account_id": 100
+      }
+    }
+  ],
+  "edges": []
+}

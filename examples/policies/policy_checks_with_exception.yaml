@@ -1,0 +1,69 @@
+version: 1
+policy_id: policy_checks_with_exception_v1
+
+metadata:
+  owner: agentlint-tests
+  scenario: milestone_4_exception_check
+
+tools:
+  lookup_account:
+    permission: allowed
+    approval: not_required
+    risk: low
+    arguments:
+      account_id:
+        required: true
+        allowed_types:
+          - string
+  send_email:
+    permission: allowed
+    approval: required
+    risk: high
+    arguments:
+      recipient:
+        required: true
+        allowed_types:
+          - string
+      body:
+        required: true
+        allowed_types:
+          - string
+  web_search:
+    permission: allowed
+    approval: not_required
+    risk: medium
+    arguments:
+      query:
+        required: true
+        allowed_types:
+          - string
+
+sources:
+  customer_profile:
+    sensitivity: private
+    trust: trusted
+  public_web:
+    sensitivity: public
+    trust: untrusted
+
+sinks:
+  web_search.query:
+    visibility: public
+  final_answer:
+    visibility: model
+
+rules:
+  unknown_tool: error
+  private_to_public_sink: error
+  sensitive_final_answer: warning
+
+exceptions:
+  - id: allow_fixture_status_search
+    rules:
+      - private_to_public_sink
+    reason: Fixture allows this exact status search flow.
+    match:
+      tool: web_search
+      source: customer_profile
+      sink: web_search.query
+      event: evt_web_search

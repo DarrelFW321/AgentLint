@@ -1,0 +1,28 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_approval_after_action",
+  "metadata": {
+    "scenario": "policy_approval_after_action"
+  },
+  "events": [
+    {
+      "id": "evt_send_email",
+      "type": "tool_call",
+      "sequence": 0,
+      "tool_name": "send_email",
+      "arguments": {
+        "recipient": "customer@example.com",
+        "body": "Your case has been updated."
+      }
+    },
+    {
+      "id": "evt_late_approval",
+      "type": "approval",
+      "sequence": 1,
+      "decision": "approved",
+      "subject_event": "evt_send_email",
+      "approved_by": "supervisor"
+    }
+  ],
+  "edges": []
+}

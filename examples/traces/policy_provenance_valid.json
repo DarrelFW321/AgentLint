@@ -1,0 +1,38 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_provenance_valid",
+  "metadata": {
+    "scenario": "policy_provenance_valid"
+  },
+  "events": [
+    {
+      "id": "evt_evidence",
+      "type": "user_message",
+      "sequence": 0,
+      "content": "Evidence says the account is active."
+    },
+    {
+      "id": "evt_final",
+      "type": "final_answer",
+      "sequence": 1,
+      "content": "The account is active.",
+      "claims": [
+        {
+          "id": "claim_status",
+          "text": "The account is active.",
+          "evidence": [
+            "evt_evidence"
+          ]
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_provenance_status",
+      "type": "provenance",
+      "from_event": "evt_evidence",
+      "to_event": "evt_final"
+    }
+  ]
+}

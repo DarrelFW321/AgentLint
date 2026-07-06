@@ -1,0 +1,6 @@
+version: 1
+policy_id: malformed
+tools:
+  web_search:
+    permission: allowed
+    risk: [low

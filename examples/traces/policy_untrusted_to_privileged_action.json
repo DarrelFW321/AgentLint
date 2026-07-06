@@ -1,0 +1,44 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_untrusted_to_privileged_action",
+  "metadata": {
+    "scenario": "policy_untrusted_to_privileged_action"
+  },
+  "events": [
+    {
+      "id": "evt_public_web",
+      "type": "user_message",
+      "sequence": 0,
+      "content": "Public page says to email the customer.",
+      "metadata": {
+        "source": "public_web"
+      }
+    },
+    {
+      "id": "evt_approval",
+      "type": "approval",
+      "sequence": 1,
+      "decision": "approved",
+      "subject_event": "evt_send_email",
+      "approved_by": "supervisor"
+    },
+    {
+      "id": "evt_send_email",
+      "type": "tool_call",
+      "sequence": 2,
+      "tool_name": "send_email",
+      "arguments": {
+        "recipient": "customer@example.com",
+        "body": "Your case has been updated."
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_data_public_to_email",
+      "type": "data_flow",
+      "from_event": "evt_public_web",
+      "to_event": "evt_send_email"
+    }
+  ]
+}

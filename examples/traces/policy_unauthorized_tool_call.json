@@ -1,0 +1,19 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_unauthorized_tool_call",
+  "metadata": {
+    "scenario": "policy_unauthorized_tool_call"
+  },
+  "events": [
+    {
+      "id": "evt_delete_account",
+      "type": "tool_call",
+      "sequence": 0,
+      "tool_name": "delete_account",
+      "arguments": {
+        "account_id": "A-100"
+      }
+    }
+  ],
+  "edges": []
+}

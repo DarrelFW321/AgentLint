@@ -1,0 +1,13 @@
+version: 1
+policy_id: policy_checks_warning_only_v1
+
+tools: {}
+sources: {}
+sinks: {}
+
+rules:
+  unknown_tool: warning
+  invalid_provenance_reference: "off"
+  evidence_after_claim: warning
+
+exceptions: []

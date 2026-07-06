@@ -1,0 +1,38 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_data_flow_valid",
+  "metadata": {
+    "scenario": "policy_data_flow_valid"
+  },
+  "events": [
+    {
+      "id": "evt_public_web",
+      "type": "user_message",
+      "sequence": 0,
+      "content": "Search for public service-status details.",
+      "metadata": {
+        "source": "public_web"
+      }
+    },
+    {
+      "id": "evt_web_search",
+      "type": "tool_call",
+      "sequence": 1,
+      "tool_name": "web_search",
+      "arguments": {
+        "query": "public service status"
+      },
+      "metadata": {
+        "sink": "web_search.query"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_data_public_to_search",
+      "type": "data_flow",
+      "from_event": "evt_public_web",
+      "to_event": "evt_web_search"
+    }
+  ]
+}

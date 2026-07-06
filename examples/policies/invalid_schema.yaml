@@ -1,0 +1,9 @@
+version: 2
+policy_id: invalid_schema
+
+tools:
+  web_search:
+    permission: maybe
+
+rules:
+  unknown_tool: loud

@@ -9,7 +9,8 @@ from typing import Annotated
 
 import typer
 
-from agentlint.diagnostics import Severity, format_diagnostics
+from agentlint.checking import check_trace_file
+from agentlint.diagnostics import Severity, explain_diagnostic_code, format_diagnostics
 from agentlint.ir.v1 import (
     TraceFileError,
     TraceJsonError,
@@ -18,7 +19,24 @@ from agentlint.ir.v1 import (
     format_validation_error,
     load_native_trace,
 )
-from agentlint.passes import validate_structure
+from agentlint.passes import evaluate_policy, validate_structure
+from agentlint.policy import (
+    Policy,
+    PolicyFileError,
+    PolicyLoadError,
+    PolicySchemaError,
+    PolicyYamlError,
+    format_policy_validation_error,
+    load_policy,
+)
+from agentlint.reports import (
+    FailOn,
+    ReportFormat,
+    build_report,
+    render_json_report,
+    render_text_report,
+    report_should_fail,
+)
 from agentlint.version import __version__
 
 app = typer.Typer(
@@ -27,6 +45,14 @@ app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
 )
+policy_app = typer.Typer(
+    name="policy",
+    help="Validate AgentLint policy files.",
+    no_args_is_help=True,
+    add_completion=False,
+)
+
+app.add_typer(policy_app, name="policy")
 
 
 @app.command()
@@ -47,10 +73,52 @@ def doctor() -> None:
 
 
 @app.command()
+def check(
+    trace_paths: Annotated[
+        list[Path],
+        typer.Argument(help="One or more native AgentLint trace JSON files."),
+    ],
+    policy_path: Annotated[
+        Path | None,
+        typer.Option("--policy", help="AgentLint YAML policy file to evaluate."),
+    ] = None,
+    report_format: Annotated[
+        ReportFormat,
+        typer.Option("--format", help="Report output format."),
+    ] = ReportFormat.TEXT,
+    fail_on: Annotated[
+        FailOn,
+        typer.Option("--fail-on", help="Diagnostic severity threshold for exit code."),
+    ] = FailOn.ERROR,
+) -> None:
+    """Check native AgentLint trace files and emit a report."""
+    policy = _load_policy_for_cli(policy_path) if policy_path is not None else None
+    results = [check_trace_file(trace_path, policy=policy) for trace_path in trace_paths]
+    report = build_report(results, fail_on=fail_on)
+
+    if report_format == ReportFormat.JSON:
+        typer.echo(render_json_report(report))
+    else:
+        typer.echo(render_text_report(report))
+
+    if report_should_fail(report):
+        raise typer.Exit(1)
+
+
+@app.command()
 def validate(
     trace_path: Annotated[Path, typer.Argument(help="Native AgentLint trace JSON file.")],
+    policy_path: Annotated[
+        Path | None,
+        typer.Option("--policy", help="AgentLint YAML policy file to evaluate."),
+    ] = None,
 ) -> None:
     """Validate a native AgentLint trace file."""
+    policy: Policy | None = None
+    if policy_path is not None:
+        policy = _load_policy_for_cli(policy_path)
+        typer.echo(f"valid policy: {policy.policy_id}")
+
     try:
         trace = load_native_trace(trace_path)
     except TraceSchemaError as exc:
@@ -72,10 +140,68 @@ def validate(
     if error_diagnostics:
         raise typer.Exit(1)
 
+    if policy is not None:
+        policy_diagnostics = evaluate_policy(trace, policy)
+        diagnostics.extend(policy_diagnostics)
+
+        if policy_diagnostics:
+            typer.echo(format_diagnostics(policy_diagnostics), err=True)
+        if any(diagnostic.severity == Severity.ERROR for diagnostic in policy_diagnostics):
+            raise typer.Exit(1)
+
     typer.echo(f"valid trace: {trace.trace_id}")
     typer.echo(f"events: {len(trace.events)}")
     typer.echo(f"edges: {len(trace.edges)}")
     typer.echo(f"diagnostics: {len(diagnostics)}")
+
+
+@app.command()
+def explain(
+    code: Annotated[str, typer.Argument(help="AgentLint diagnostic code to explain.")],
+) -> None:
+    """Explain an AgentLint diagnostic code."""
+    explanation = explain_diagnostic_code(code)
+    if explanation is None:
+        typer.echo(f"error: unknown diagnostic code: {code}", err=True)
+        raise typer.Exit(1)
+
+    typer.echo(f"code: {explanation.code.value}")
+    typer.echo(f"category: {explanation.category}")
+    typer.echo(f"type: {explanation.kind}")
+    typer.echo(f"meaning: {explanation.meaning}")
+    typer.echo(f"remediation: {explanation.remediation}")
+
+
+@policy_app.command("validate")
+def validate_policy(
+    policy_path: Annotated[Path, typer.Argument(help="AgentLint YAML policy file.")],
+) -> None:
+    """Validate an AgentLint YAML policy file."""
+    policy = _load_policy_for_cli(policy_path)
+    _echo_policy_summary(policy)
+
+
+def _load_policy_for_cli(policy_path: Path) -> Policy:
+    try:
+        return load_policy(policy_path)
+    except PolicySchemaError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        for formatted_error in format_policy_validation_error(exc.validation_error):
+            typer.echo(f"  - {formatted_error}", err=True)
+        raise typer.Exit(1) from exc
+    except (PolicyFileError, PolicyYamlError, PolicyLoadError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(1) from exc
+
+
+def _echo_policy_summary(policy: Policy) -> None:
+    typer.echo(f"valid policy: {policy.policy_id}")
+    typer.echo(f"version: {policy.version}")
+    typer.echo(f"tools: {len(policy.tools)}")
+    typer.echo(f"sources: {len(policy.sources)}")
+    typer.echo(f"sinks: {len(policy.sinks)}")
+    typer.echo(f"rules: {len(policy.rules)}")
+    typer.echo(f"exceptions: {len(policy.exceptions)}")
 
 
 def main() -> None:

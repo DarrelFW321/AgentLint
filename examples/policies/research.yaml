@@ -1,0 +1,71 @@
+version: 1
+policy_id: research_v1
+
+metadata:
+  owner: research-platform
+  scenario: research_agent
+
+tools:
+  web_search:
+    permission: allowed
+    approval: not_required
+    risk: medium
+    arguments:
+      query:
+        required: true
+        allowed_types:
+          - string
+  paper_lookup:
+    permission: allowed
+    approval: not_required
+    risk: low
+    arguments:
+      doi:
+        required: false
+        allowed_types:
+          - string
+      title:
+        required: false
+        allowed_types:
+          - string
+  cite_source:
+    permission: allowed
+    approval: not_required
+    risk: low
+
+sources:
+  public_web:
+    sensitivity: public
+    trust: untrusted
+  scholarly_index:
+    sensitivity: public
+    trust: trusted
+  user_prompt:
+    sensitivity: internal
+    trust: unknown
+
+sinks:
+  web_search.query:
+    visibility: public
+  final_answer:
+    visibility: model
+  citation:
+    visibility: public
+
+rules:
+  unknown_tool: error
+  unauthorized_tool_call: error
+  disallowed_tool_argument: warning
+  missing_approval: error
+  approval_after_action: error
+  action_after_denial: error
+  approval_mismatch: error
+  private_to_public_sink: error
+  secret_exposure: error
+  untrusted_to_privileged_action: warning
+  sensitive_final_answer: warning
+  unsupported_claim: error
+  invalid_provenance_reference: error
+  evidence_after_claim: warning
+
+exceptions: []

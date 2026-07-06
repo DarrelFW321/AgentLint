@@ -1,0 +1,23 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_unsupported_claim",
+  "metadata": {
+    "scenario": "policy_unsupported_claim"
+  },
+  "events": [
+    {
+      "id": "evt_final",
+      "type": "final_answer",
+      "sequence": 0,
+      "content": "The account is active.",
+      "claims": [
+        {
+          "id": "claim_status",
+          "text": "The account is active.",
+          "evidence": []
+        }
+      ]
+    }
+  ],
+  "edges": []
+}

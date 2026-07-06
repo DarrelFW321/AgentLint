@@ -2,6 +2,8 @@ from agentlint.diagnostics import (
     Diagnostic,
     DiagnosticCode,
     Severity,
+    all_diagnostic_explanations,
+    explain_diagnostic_code,
     format_diagnostic,
     format_diagnostics,
 )
@@ -61,3 +63,42 @@ def test_format_diagnostics_joins_multiple_diagnostics() -> None:
         'error[DUPLICATE_EVENT_ID]: duplicate event id "evt_1"\n'
         'error[DUPLICATE_EDGE_ID]: duplicate edge id "edge_1"'
     )
+
+
+def test_diagnostic_code_contains_milestone_4_policy_codes() -> None:
+    policy_codes = {
+        DiagnosticCode.UNKNOWN_TOOL,
+        DiagnosticCode.UNAUTHORIZED_TOOL_CALL,
+        DiagnosticCode.DISALLOWED_TOOL_ARGUMENT,
+        DiagnosticCode.MISSING_APPROVAL,
+        DiagnosticCode.APPROVAL_AFTER_ACTION,
+        DiagnosticCode.ACTION_AFTER_DENIAL,
+        DiagnosticCode.APPROVAL_MISMATCH,
+        DiagnosticCode.PRIVATE_TO_PUBLIC_SINK,
+        DiagnosticCode.SECRET_EXPOSURE,
+        DiagnosticCode.UNTRUSTED_TO_PRIVILEGED_ACTION,
+        DiagnosticCode.SENSITIVE_FINAL_ANSWER,
+        DiagnosticCode.UNSUPPORTED_CLAIM,
+        DiagnosticCode.INVALID_PROVENANCE_REFERENCE,
+        DiagnosticCode.EVIDENCE_AFTER_CLAIM,
+    }
+
+    assert {code.value for code in policy_codes} <= {code.value for code in DiagnosticCode}
+
+
+def test_every_diagnostic_code_has_explanation() -> None:
+    explanations = all_diagnostic_explanations()
+
+    assert set(explanations) == set(DiagnosticCode)
+
+
+def test_explain_diagnostic_code_is_case_insensitive() -> None:
+    explanation = explain_diagnostic_code("unknown_tool")
+
+    assert explanation is not None
+    assert explanation.code == DiagnosticCode.UNKNOWN_TOOL
+    assert explanation.category == "policy"
+
+
+def test_explain_diagnostic_code_returns_none_for_unknown_code() -> None:
+    assert explain_diagnostic_code("NOT_A_CODE") is None

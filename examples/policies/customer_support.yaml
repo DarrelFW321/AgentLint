@@ -1,0 +1,89 @@
+version: 1
+policy_id: customer_support_v1
+
+metadata:
+  owner: support-platform
+  scenario: customer_support
+
+tools:
+  lookup_account:
+    permission: allowed
+    approval: not_required
+    risk: low
+    arguments:
+      account_id:
+        required: true
+        allowed_types:
+          - string
+  send_email:
+    permission: allowed
+    approval: required
+    risk: high
+    arguments:
+      recipient:
+        required: true
+        allowed_types:
+          - string
+      body:
+        required: true
+        allowed_types:
+          - string
+  create_refund:
+    permission: allowed
+    approval: required
+    risk: high
+  web_search:
+    permission: allowed
+    approval: not_required
+    risk: medium
+  delete_account:
+    permission: denied
+    approval: required
+    risk: critical
+
+sources:
+  customer_profile:
+    sensitivity: private
+    trust: trusted
+  public_web:
+    sensitivity: public
+    trust: untrusted
+  support_knowledge_base:
+    sensitivity: internal
+    trust: trusted
+
+sinks:
+  web_search.query:
+    visibility: public
+  final_answer:
+    visibility: model
+  email.body:
+    visibility: private
+
+rules:
+  unknown_tool: error
+  unauthorized_tool_call: error
+  disallowed_tool_argument: error
+  missing_approval: error
+  approval_after_action: error
+  action_after_denial: error
+  approval_mismatch: error
+  private_to_public_sink: error
+  secret_exposure: error
+  untrusted_to_privileged_action: error
+  sensitive_final_answer: warning
+  unsupported_claim: warning
+  invalid_provenance_reference: error
+  evidence_after_claim: warning
+
+exceptions:
+  - id: allow_public_status_search
+    rules:
+      - private_to_public_sink
+    reason: Synthetic fixture allows public lookup of non-sensitive status text.
+    expires: "2026-12-31"
+    match:
+      tool: web_search
+      source: customer_profile
+      sink: web_search.query
+      event: evt_allowed_status_search

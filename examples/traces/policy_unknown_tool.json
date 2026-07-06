@@ -1,0 +1,17 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_unknown_tool",
+  "metadata": {
+    "scenario": "policy_unknown_tool"
+  },
+  "events": [
+    {
+      "id": "evt_unknown_tool",
+      "type": "tool_call",
+      "sequence": 0,
+      "tool_name": "unknown_tool",
+      "arguments": {}
+    }
+  ],
+  "edges": []
+}

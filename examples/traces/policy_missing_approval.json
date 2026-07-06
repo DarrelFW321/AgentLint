@@ -1,0 +1,20 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_missing_approval",
+  "metadata": {
+    "scenario": "policy_missing_approval"
+  },
+  "events": [
+    {
+      "id": "evt_send_email",
+      "type": "tool_call",
+      "sequence": 0,
+      "tool_name": "send_email",
+      "arguments": {
+        "recipient": "customer@example.com",
+        "body": "Your case has been updated."
+      }
+    }
+  ],
+  "edges": []
+}

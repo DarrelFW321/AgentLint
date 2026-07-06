@@ -1,0 +1,6 @@
+version: 1
+policy_id: duplicate_key
+
+rules:
+  unknown_tool: error
+  unknown_tool: warning

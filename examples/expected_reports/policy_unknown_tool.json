@@ -1,0 +1,45 @@
+{
+  "schema_version": "agentlint.report.v1",
+  "agentlint_version": "0.0.0",
+  "summary": {
+    "trace_count": 1,
+    "passed": 0,
+    "failed": 1,
+    "invalid": 0,
+    "diagnostics": {
+      "error": 1,
+      "warning": 0,
+      "info": 0
+    },
+    "fail_on": "error",
+    "failed_threshold": true
+  },
+  "runs": [
+    {
+      "trace_path": "examples/traces/policy_unknown_tool.json",
+      "trace_id": "trace_policy_unknown_tool",
+      "policy_id": "policy_checks_v1",
+      "status": "failed",
+      "events": 1,
+      "edges": 0,
+      "diagnostics": [
+        {
+          "code": "UNKNOWN_TOOL",
+          "severity": "error",
+          "message": "tool call \"evt_unknown_tool\" uses unknown tool \"unknown_tool\"",
+          "related_events": [
+            "evt_unknown_tool"
+          ],
+          "related_edges": [],
+          "policy_reference": "policy_checks_v1:unknown_tool",
+          "remediation": "Add the tool to the policy or remove the tool call from the trace."
+        }
+      ],
+      "input_error": null
+    }
+  ],
+  "redaction": {
+    "mode": "metadata_only",
+    "raw_values_included": false
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_approval_mismatch",
+  "metadata": {
+    "scenario": "policy_approval_mismatch"
+  },
+  "events": [
+    {
+      "id": "evt_user",
+      "type": "user_message",
+      "sequence": 0,
+      "content": "Please approve the next email."
+    },
+    {
+      "id": "evt_approval",
+      "type": "approval",
+      "sequence": 1,
+      "decision": "approved",
+      "subject_event": "evt_user",
+      "approved_by": "supervisor"
+    }
+  ],
+  "edges": []
+}

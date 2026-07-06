@@ -1,0 +1,31 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_evidence_after_claim",
+  "metadata": {
+    "scenario": "policy_evidence_after_claim"
+  },
+  "events": [
+    {
+      "id": "evt_final",
+      "type": "final_answer",
+      "sequence": 0,
+      "content": "The account is active.",
+      "claims": [
+        {
+          "id": "claim_status",
+          "text": "The account is active.",
+          "evidence": [
+            "evt_evidence"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evt_evidence",
+      "type": "user_message",
+      "sequence": 1,
+      "content": "Evidence says the account is active."
+    }
+  ],
+  "edges": []
+}

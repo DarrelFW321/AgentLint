@@ -1,0 +1,87 @@
+version: 1
+policy_id: policy_checks_v1
+
+metadata:
+  owner: agentlint-tests
+  scenario: milestone_4_policy_checks
+
+tools:
+  lookup_account:
+    permission: allowed
+    approval: not_required
+    risk: low
+    arguments:
+      account_id:
+        required: true
+        allowed_types:
+          - string
+  send_email:
+    permission: allowed
+    approval: required
+    risk: high
+    arguments:
+      recipient:
+        required: true
+        allowed_types:
+          - string
+      body:
+        required: true
+        allowed_types:
+          - string
+  create_refund:
+    permission: allowed
+    approval: required
+    risk: high
+  web_search:
+    permission: allowed
+    approval: not_required
+    risk: medium
+    arguments:
+      query:
+        required: true
+        allowed_types:
+          - string
+  delete_account:
+    permission: denied
+    approval: required
+    risk: critical
+
+sources:
+  customer_profile:
+    sensitivity: private
+    trust: trusted
+  public_web:
+    sensitivity: public
+    trust: untrusted
+  environment_secret:
+    sensitivity: secret
+    trust: trusted
+  support_knowledge_base:
+    sensitivity: internal
+    trust: trusted
+
+sinks:
+  web_search.query:
+    visibility: public
+  email.body:
+    visibility: private
+  final_answer:
+    visibility: model
+
+rules:
+  unknown_tool: error
+  unauthorized_tool_call: error
+  disallowed_tool_argument: error
+  missing_approval: error
+  approval_after_action: error
+  action_after_denial: error
+  approval_mismatch: error
+  private_to_public_sink: error
+  secret_exposure: error
+  untrusted_to_privileged_action: error
+  sensitive_final_answer: warning
+  unsupported_claim: warning
+  invalid_provenance_reference: error
+  evidence_after_claim: warning
+
+exceptions: []

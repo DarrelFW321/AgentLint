@@ -1,0 +1,38 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_policy_private_to_public_sink",
+  "metadata": {
+    "scenario": "policy_private_to_public_sink"
+  },
+  "events": [
+    {
+      "id": "evt_customer_profile",
+      "type": "user_message",
+      "sequence": 0,
+      "content": "Customer profile details.",
+      "metadata": {
+        "source": "customer_profile"
+      }
+    },
+    {
+      "id": "evt_web_search",
+      "type": "tool_call",
+      "sequence": 1,
+      "tool_name": "web_search",
+      "arguments": {
+        "query": "customer profile details"
+      },
+      "metadata": {
+        "sink": "web_search.query"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_data_customer_to_search",
+      "type": "data_flow",
+      "from_event": "evt_customer_profile",
+      "to_event": "evt_web_search"
+    }
+  ]
+}
