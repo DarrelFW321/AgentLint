@@ -7,6 +7,39 @@ AgentLint checks recorded agent runs against project policies. Use it in tests a
 to catch unsafe tool use, missing approvals, sensitive-data flows, and unsupported
 claims.
 
+## Integrations
+
+| Integration | Setup | Use case |
+| --- | --- | --- |
+| OpenAI Agents SDK | pytest plugin or one-line `instrument()` call | Recommended |
+| OpenTelemetry | Import OTLP-style JSON | Existing tracing pipelines |
+
+### OpenAI Agents SDK
+
+The pytest integration captures existing tests without code changes. The quick start
+below shows the complete command.
+
+For scripts or another test runner, add capture once at process startup:
+
+```python
+from agentlint.integrations.openai_agents import instrument
+
+session = instrument(".agentlint/openai-agents")
+
+# Run the agent.
+
+session.close()
+```
+
+No per-tool wrappers or tracing backend are required. See the
+[integration guide](Documents/user-guide.md#openai-agents-integration) for local-only
+capture and approval or data-flow helpers.
+
+### OpenTelemetry
+
+Projects with an existing OpenTelemetry pipeline can import OTLP-style JSON. See
+[OpenTelemetry compatibility](Documents/user-guide.md#opentelemetry-compatibility).
+
 ## Quick start
 
 ### 1. Install
@@ -52,6 +85,24 @@ pytest --agentlint --agentlint-policy agentlint.yaml
 
 AgentLint captures supported agent runs, evaluates the policy, prints diagnostics, and
 returns a nonzero exit code for policy violations or incomplete traces.
+
+## Sample output
+
+A policy violation produces a stable diagnostic code and a suggested fix:
+
+```text
+AgentLint Report
+traces: 0 passed, 1 failed, 0 not verifiable, 0 invalid
+diagnostics: 1 error, 0 warning, 0 info
+
+status: failed
+
+error[DENIED_TOOL_CALL]: tool call "evt_delete_account" uses tool
+"delete_account" denied by trace policy
+  related events: evt_delete_account
+  remediation: Remove the call or update the trace policy when this tool
+  should be permitted.
+```
 
 ## Documentation
 
