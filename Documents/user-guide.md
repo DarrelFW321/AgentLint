@@ -9,11 +9,14 @@ and advanced trace import.
 - pytest, only when using the pytest workflow
 - OpenAI Agents SDK 0.18.x for the supported framework integration
 
-Install from the repository:
+Install AgentLint with the OpenAI Agents integration:
 
 ```bash
-python -m pip install -e ".[openai-agents]"
+python -m pip install "agentlint-trace[openai-agents]==0.1.0a1"
 ```
+
+The distribution is named `agentlint-trace`; the command and Python package remain
+`agentlint`.
 
 ## OpenAI Agents integration
 

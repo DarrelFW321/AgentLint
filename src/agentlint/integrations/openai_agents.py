@@ -301,7 +301,7 @@ def instrument(
         from agents import add_trace_processor, set_trace_processors
     except ImportError as exc:
         raise OpenAIAgentsIntegrationError(
-            'openai-agents is required; install "agentlint[openai-agents]"'
+            'openai-agents is required; install "agentlint-trace[openai-agents]"'
         ) from exc
 
     processor = AgentLintTraceProcessor(output_dir)
@@ -329,7 +329,7 @@ def _installed_sdk_version(*, required: bool) -> str | None:
     except PackageNotFoundError as exc:
         if required:
             raise OpenAIAgentsIntegrationError(
-                'openai-agents is required; install "agentlint[openai-agents]"'
+                'openai-agents is required; install "agentlint-trace[openai-agents]"'
             ) from exc
         return None
     components = installed.split(".")

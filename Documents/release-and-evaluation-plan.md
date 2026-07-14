@@ -1,6 +1,6 @@
 # AgentLint 0.1 Pre-release and OpenAI Agents Evaluation Plan
 
-Status: proposed
+Status: Phase 1 in progress
 
 ## Objective
 
@@ -17,33 +17,20 @@ This plan covers four outcomes:
    fidelity, and required annotations.
 4. Resolve findings before approving another framework integration.
 
-## Release-name blocker
+## Distribution-name decision
 
-The PyPI distribution name `agentlint` is already owned by a different active
-project. This repository cannot publish a package that users install with:
+The PyPI distribution is `agentlint-trace`. The product, command, and Python import
+package remain `AgentLint` and `agentlint`.
+
+The `agentlint` distribution name is owned by a different active project, so this
+project is installed with:
 
 ```bash
-pip install agentlint[openai-agents]
+pip install agentlint-trace[openai-agents]
 ```
 
-unless the current owner transfers that PyPI project.
-
-Before release work begins, choose one of these paths:
-
-1. Obtain a transfer of the `agentlint` PyPI project.
-2. Publish this project under a distinct distribution name while retaining:
-   - the `agentlint` command;
-   - the `agentlint` Python import package; and
-   - the AgentLint product name.
-3. Rename the product, distribution, command, and import package together.
-
-The recommended short-term path is option 2. Candidate distribution names must be
-checked through the PyPI API immediately before reservation. Search results currently
-show no projects for names such as `agentlint-trace` or `agentlint-traces`, but absence
-from search is not a reservation.
-
-The rest of this plan uses `<distribution-name>` wherever the unresolved PyPI name
-matters.
+The name must be checked again immediately before its first publication because an
+unused PyPI name is not reserved until a project is created.
 
 ## Version decision
 
@@ -118,7 +105,7 @@ Then test both artifacts in clean environments:
 
 ```bash
 pip install dist/<wheel>
-pip install "<distribution-name>[openai-agents] @ file://..."
+pip install "agentlint-trace[openai-agents] @ file://..."
 agentlint version
 agentlint doctor
 agentlint --help
@@ -560,7 +547,7 @@ If a criterion fails:
 
 Execute in this order:
 
-1. Decide the distribution name.
+1. Use the `agentlint-trace` distribution name.
 2. Implement single-source versioning and `0.1.0a1` metadata.
 3. Add changelog, build checks, wheel smoke tests, and release workflow.
 4. Configure the PyPI trusted publisher.

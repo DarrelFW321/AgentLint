@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/DarrelFW321/AgentLint/actions/workflows/ci.yml/badge.svg)](https://github.com/DarrelFW321/AgentLint/actions/workflows/ci.yml)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
+[![PyPI](https://img.shields.io/pypi/v/agentlint-trace.svg)](https://pypi.org/project/agentlint-trace/)
 
 AgentLint checks recorded agent runs for unsafe tool use, missing approvals,
 sensitive-data flows, and unsupported claims.
@@ -16,9 +17,7 @@ sensitive-data flows, and unsupported claims.
 ## Install
 
 ```bash
-git clone https://github.com/DarrelFW321/AgentLint.git
-cd AgentLint
-python -m pip install -e ".[openai-agents]"
+python -m pip install "agentlint-trace[openai-agents]==0.1.0a1"
 ```
 
 AgentLint requires Python 3.12 or newer.

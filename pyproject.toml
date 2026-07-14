@@ -3,8 +3,8 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "agentlint"
-version = "0.0.0"
+name = "agentlint-trace"
+dynamic = ["version"]
 description = "A CI linter for AI agent execution traces."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -21,11 +21,12 @@ keywords = [
   "traces",
 ]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 3 - Alpha",
   "Environment :: Console",
   "Intended Audience :: Developers",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Software Development :: Quality Assurance",
 ]
 dependencies = [
@@ -46,6 +47,10 @@ otel-demo = [
 openai-agents = [
   "openai-agents>=0.18,<0.19",
 ]
+release = [
+  "build>=1.2",
+  "twine>=6.0",
+]
 
 [dependency-groups]
 dev = [
@@ -58,6 +63,18 @@ agentlint = "agentlint.cli:main"
 
 [project.entry-points.pytest11]
 agentlint = "agentlint.integrations.pytest_openai"
+
+[project.urls]
+Homepage = "https://github.com/DarrelFW321/AgentLint"
+Documentation = "https://github.com/DarrelFW321/AgentLint/blob/main/Documents/user-guide.md"
+Issues = "https://github.com/DarrelFW321/AgentLint/issues"
+Repository = "https://github.com/DarrelFW321/AgentLint.git"
+
+[tool.hatch.version]
+path = "src/agentlint/version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentlint"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -74,7 +91,7 @@ markers = [
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-src = ["src", "tests"]
+src = ["src", "tests", "scripts"]
 
 [tool.ruff.lint]
 select = ["B", "E", "F", "I", "UP"]
