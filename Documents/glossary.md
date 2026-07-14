@@ -8,7 +8,7 @@ A component that imports a source trace format and translates it into the AgentL
 
 ## Approval
 
-A human or system decision that authorizes or denies a pending action, usually a sensitive tool call.
+A recorded human or system decision that authorizes or denies an action, usually a sensitive tool call. AgentLint verifies represented approval evidence; it does not initially collect or enforce approvals.
 
 ## Claim
 
@@ -28,11 +28,11 @@ The canonical AgentLint representation of an imported trace. It normalizes event
 
 ## Policy
 
-A developer-defined configuration that describes allowed tools, required approvals, data-handling constraints, provenance requirements, severities, and exceptions.
+A developer-defined trace-conformance configuration that describes tool contracts, required approval evidence, explicit data-handling constraints, provenance requirements, severities, and exceptions. It is not a complete contextual authorization system.
 
 ## Provenance
 
-The relationship between a claim and the prior observations or events that support it.
+An explicit relationship between a claim and prior observations or events declared as its evidence. Initial AgentLint checks validate the relationship's integrity, not whether the evidence semantically proves the claim.
 
 ## Sink
 
@@ -52,7 +52,11 @@ The observed result returned from a tool call.
 
 ## Trace
 
-A recorded or in-progress execution of an AI agent, represented as events and relationships between those events.
+A recorded execution of an AI agent, represented as events and relationships between those events.
+
+## Not Verifiable
+
+The result for a structurally valid trace with no known policy violation when evidence required by the selected policy was unavailable, unknown, or below the required capture level. It is not a pass.
 
 ## Value
 

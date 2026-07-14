@@ -1,0 +1,80 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "otel_missing_approval",
+  "metadata": {
+    "adapter": "opentelemetry",
+    "source_trace_id": "22222222222222222222222222222222"
+  },
+  "capture": {
+    "schema_version": "agentlint.capture.v1",
+    "adapter": "opentelemetry",
+    "adapter_version": null,
+    "framework": "opentelemetry",
+    "framework_version": null,
+    "capabilities": {
+      "agent_runs": {
+        "status": "partial",
+        "reason": "Generic spans do not guarantee an agent-run boundary."
+      },
+      "model_calls": {
+        "status": "partial",
+        "reason": "Only explicitly typed AgentLint model spans are recognized."
+      },
+      "tool_calls": {
+        "status": "partial",
+        "reason": "Only explicitly typed AgentLint tool spans are recognized."
+      },
+      "tool_arguments": {
+        "status": "partial",
+        "reason": "Arguments require a valid explicit JSON attribute."
+      },
+      "tool_results": {
+        "status": "partial",
+        "reason": "Results require explicitly typed AgentLint result spans."
+      },
+      "approvals": {
+        "status": "partial",
+        "reason": "Approvals require explicit AgentLint approval attributes."
+      },
+      "data_flow": {
+        "status": "partial",
+        "reason": "Only explicit AgentLint data-flow edges are preserved."
+      },
+      "provenance": {
+        "status": "partial",
+        "reason": "Only explicit claims and provenance edges are preserved."
+      },
+      "final_answers": {
+        "status": "partial",
+        "reason": "Only explicitly typed final-answer spans are recognized."
+      }
+    },
+    "notes": []
+  },
+  "events": [
+    {
+      "id": "evt_send_email",
+      "sequence": 0,
+      "timestamp": "100",
+      "actor": null,
+      "metadata": {
+        "otel_span_name": "tool.call send_email",
+        "otel_span_id": "0000000000000001"
+      },
+      "source_ref": {
+        "source": "opentelemetry",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "0000000000000001"
+      },
+      "type": "tool_call",
+      "tool_name": "send_email",
+      "arguments": {
+        "recipient": "customer@example.com",
+        "body": "Your case has been updated."
+      }
+    }
+  ],
+  "edges": []
+}

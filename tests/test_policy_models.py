@@ -57,6 +57,24 @@ def test_policy_serializes_enums_as_stable_strings() -> None:
     assert policy.model_dump(mode="json")["rules"] == {"unknown_tool": "error"}
 
 
+def test_legacy_unauthorized_rule_is_normalized_to_denied_tool_language() -> None:
+    policy = make_policy(rules={"unauthorized_tool_call": "warning"})
+
+    assert policy.rules == {RuleId.DENIED_TOOL_CALL: PolicySeverity.WARNING}
+    assert policy.model_dump(mode="json")["rules"] == {"denied_tool_call": "warning"}
+    assert RuleId.UNAUTHORIZED_TOOL_CALL is RuleId.DENIED_TOOL_CALL
+
+
+def test_policy_rejects_legacy_and_current_denied_tool_rules_together() -> None:
+    with pytest.raises(ValidationError, match="cannot configure both"):
+        make_policy(
+            rules={
+                "unauthorized_tool_call": "warning",
+                "denied_tool_call": "error",
+            }
+        )
+
+
 def test_policy_rejects_extra_fields() -> None:
     with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
         make_policy(unexpected=True)
@@ -77,6 +95,27 @@ def test_policy_rejects_invalid_enum_values() -> None:
             },
             rules={"unknown_tool": "loud"},
         )
+
+
+def test_policy_accepts_capture_requirements() -> None:
+    policy = make_policy(capture={"require": {"tool_calls": "partial", "approvals": "captured"}})
+
+    assert policy.model_dump(mode="json")["capture"] == {
+        "require": {"tool_calls": "partial", "approvals": "captured"}
+    }
+
+
+@pytest.mark.parametrize(
+    "require",
+    [
+        {"unknown_capability": "partial"},
+        {"tool_calls": "unknown"},
+        {"approvals": "unavailable"},
+    ],
+)
+def test_policy_rejects_invalid_capture_requirements(require: dict[str, str]) -> None:
+    with pytest.raises(ValidationError):
+        make_policy(capture={"require": require})
 
 
 @pytest.mark.parametrize(

@@ -1,8 +1,8 @@
 {
   "schema_version": "agentlint.ir.v1",
-  "trace_id": "trace_policy_unauthorized_tool_call",
+  "trace_id": "trace_policy_denied_tool_call",
   "metadata": {
-    "scenario": "policy_unauthorized_tool_call"
+    "scenario": "policy_denied_tool_call"
   },
   "events": [
     {

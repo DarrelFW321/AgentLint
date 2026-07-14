@@ -1,8 +1,12 @@
 # AgentLint
 
-**AgentLint is a CI linter for AI agent traces.**
+**AgentLint is an offline, deterministic CI linter for recorded AI agent traces.**
 
 AgentLint imports execution logs from OpenAI Agents, LangSmith, OpenTelemetry, and custom JSON, normalizes them into a checkable intermediate representation, and detects unsafe tool calls, private data leaks, and unsupported claims against developer-defined policies.
+
+Its bounded product question is:
+
+> Did this recorded agent run violate a developer-defined policy that can be verified from the captured evidence?
 
 ## Why AgentLint?
 
@@ -37,6 +41,15 @@ MCP tool logs           ┘
 
 Under the hood, AgentLint performs policy checking, data-flow analysis, and provenance validation over tool-using agent executions.
 
+In the initial product, those terms have deliberately narrow meanings:
+
+- Tool checking validates explicit tool contracts, arguments, and call/result relationships.
+- Approval checking verifies recorded approval or denial evidence linked to an action.
+- Data-flow checking follows explicit source, sink, and flow relationships; it is not universal taint tracking.
+- Provenance checking validates explicit claim-to-evidence relationships; it is not semantic fact-checking.
+
+If the selected policy requires evidence the trace did not capture, AgentLint reports `not_verifiable` rather than treating missing telemetry as safe behavior.
+
 ## Example
 
 ```bash
@@ -64,7 +77,7 @@ The goal is to make agent safety checks feel like familiar developer tooling:
 
 ## Research Framing
 
-AgentLint explores static and runtime analysis for tool-using AI agents by translating heterogeneous execution traces into a policy-checkable intermediate representation.
+AgentLint explores deterministic offline analysis for tool-using AI agents by translating heterogeneous execution traces into a policy-checkable intermediate representation.
 
 The long-term goal is to make AI agent executions easier to audit, test, and secure before they reach production.
 
@@ -74,4 +87,10 @@ AgentLint is used like this:
 
 > Developers run their agents, collect traces, and let AgentLint lint those traces for policy violations before the agent ships.
 
-AgentLint analyzes recorded or in-progress AI agent executions. It does not attempt to prove that an agent is universally safe. Instead, it verifies that specific runs satisfy developer-defined policies around tool use, data flow, and provenance.
+AgentLint analyzes recorded AI agent executions. It does not attempt to prove that an agent is universally safe. Instead, it verifies that specific runs satisfy developer-defined policies around tool use, explicit data flow, approvals, and explicit provenance.
+
+## Scope Boundary
+
+AgentLint is a developer test and CI tool. It consumes traces from frameworks and observability systems rather than replacing them.
+
+The initial product does not provide runtime action authorization, action blocking, approval interfaces, identity or role management, trace hosting, compliance dashboards, automatic arbitrary-language taint tracking, or general LLM evaluation. Those concerns may integrate with AgentLint later, but they are not required to establish the trace-linting product.

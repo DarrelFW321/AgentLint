@@ -1,0 +1,68 @@
+{
+  "schema_version": "agentlint.openai_agents.snapshot.v1",
+  "trace_id": "trace_c952fda209db455e8212f9b6f1b1bf06",
+  "workflow_name": "approved_refund",
+  "group_id": null,
+  "metadata": {},
+  "started_at": null,
+  "ended_at": null,
+  "sdk_version": "0.18.2",
+  "spans": [
+    {
+      "trace_id": "trace_c952fda209db455e8212f9b6f1b1bf06",
+      "span_id": "span_3d686fe16c1f45a7b29f2cc7",
+      "parent_id": null,
+      "started_at": null,
+      "ended_at": null,
+      "has_error": false,
+      "span_type": "agent",
+      "span_data": {
+        "name": "Customer support",
+        "handoffs": null,
+        "tools": null,
+        "output_type": null
+      }
+    },
+    {
+      "trace_id": "trace_c952fda209db455e8212f9b6f1b1bf06",
+      "span_id": "agentlint_approval_span_5d9671e469c84343b84d904a",
+      "parent_id": null,
+      "started_at": null,
+      "ended_at": null,
+      "has_error": false,
+      "span_type": "agentlint_approval",
+      "span_data": {
+        "decision": "approved",
+        "subject_event": "span_5d9671e469c84343b84d904a"
+      }
+    },
+    {
+      "trace_id": "trace_c952fda209db455e8212f9b6f1b1bf06",
+      "span_id": "span_5d9671e469c84343b84d904a",
+      "parent_id": "span_3d686fe16c1f45a7b29f2cc7",
+      "started_at": null,
+      "ended_at": null,
+      "has_error": false,
+      "span_type": "function",
+      "span_data": {
+        "name": "issue_refund",
+        "input": "{\"ticket_id\":\"T-100\"}",
+        "output": "refund queued",
+        "mcp_data": null
+      }
+    },
+    {
+      "trace_id": "trace_c952fda209db455e8212f9b6f1b1bf06",
+      "span_id": "agentlint_final_trace_c952fda209db455e8212f9b6f1b1bf06",
+      "parent_id": null,
+      "started_at": null,
+      "ended_at": null,
+      "has_error": false,
+      "span_type": "agentlint_final_answer",
+      "span_data": {
+        "content": "Request handled."
+      }
+    }
+  ],
+  "capture_incidents": []
+}

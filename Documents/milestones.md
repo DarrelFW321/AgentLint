@@ -19,7 +19,15 @@ raw traces
 
 The compiler model is a good fit because AgentLint has multiple input formats, a canonical intermediate representation, analysis passes, diagnostics, and multiple report outputs. Product messaging should still stay simple: AgentLint imports traces, checks policies, and reports violations.
 
+The roadmap is governed by one bounded product question:
+
+> Did this recorded agent run violate a developer-defined policy that can be verified from the captured evidence?
+
+Milestones should prioritize deterministic regression detection over completed agent tests. The initial product is not a runtime authorization system, approval interface, observability platform, universal taint tracker, semantic answer judge, or compliance suite. Tool policies are trace-conformance contracts; approvals, data flow, and provenance are checked only when represented by explicit evidence. Insufficient policy-required evidence produces `not_verifiable`.
+
 The AgentLint intermediate representation should be graph-shaped. Event order, data dependencies, approval links, and provenance links are different relationships over the same execution trace and should not be collapsed into a single event list.
+
+The post-Milestone 10 scope-alignment work is specified in `Documents/milestone_11_scope_alignment_implementation_plan.md`. M11 consolidates rule activation, evidence requirements, diagnostic paths, and the primary consumer workflow before another framework adapter is added.
 
 ## Rego And OPA Decision
 
@@ -271,13 +279,9 @@ Exit criteria:
 
 Goal: show that AgentLint can analyze traces from a real agent ecosystem.
 
-Recommended first adapter: OpenAI Agents tracing.
+Implemented first adapter direction: OpenTelemetry with explicit AgentLint semantic attributes.
 
-Reasoning: it is agent-native and likely to produce a stronger initial safety demo than a generic span format.
-
-Recommended second adapter: OpenTelemetry.
-
-Reasoning: it gives AgentLint a broader interoperability story after the first agent-native adapter works.
+Reasoning: it gives AgentLint a real external tracing ecosystem while keeping routine tests and demos offline and zero-cost. OpenAI Agents tracing remains the recommended next adapter because it is agent-native and likely to produce a stronger live demo, but it requires API billing for live runs.
 
 Deliverables:
 
@@ -293,25 +297,102 @@ Exit criteria:
 2. Existing checks run without adapter-specific logic.
 3. Unsupported or ambiguous source data produces actionable adapter diagnostics.
 
-## Milestone 8: Optional OPA/Rego Experiment
+## Milestone 8: Capture Completeness Reporting
 
-Goal: evaluate whether Rego is useful for advanced custom policies over AgentLint facts.
+Goal: make the evidence boundary of every checked trace explicit before adding deeper framework integrations.
 
 Deliverables:
 
-1. `agentlint facts` command exporting derived facts JSON.
-2. Experimental Rego input format.
-3. Example Rego policies for simple tool and approval checks.
-4. Documentation explaining that built-in AgentLint diagnostics remain the default.
-5. Tests comparing equivalent built-in and Rego-backed decisions for a few simple cases.
+1. Versioned capture completeness model with `captured`, `partial`, `unavailable`, and `unknown` states.
+2. Per-trace capability coverage for agent runs, model calls, tool calls, tool arguments, tool results, approvals, data flow, provenance, and final answers.
+3. Capture metadata preserved through external normalization into native IR.
+4. Per-run and aggregate completeness in text and JSON reports.
+5. Conservative OpenTelemetry capability declarations and degradation for dropped source data.
+6. A report schema bump to `agentlint.report.v2`.
+7. Redaction and determinism tests for completeness explanations.
 
 Exit criteria:
 
-1. Rego can express useful custom checks over AgentLint facts.
-2. Rego integration does not weaken built-in diagnostics.
-3. The project has enough evidence to decide whether Rego should remain experimental, become supported, or be deferred.
+1. A passing report cannot silently imply that unavailable or unknown semantics were verified.
+2. Existing native traces remain valid and receive an unknown profile when completeness is undeclared.
+3. OpenTelemetry completeness survives the import-to-check workflow.
+4. Existing policy and structural behavior remains unchanged.
 
-## Milestone 9: Research Evaluation
+## Milestone 9: First-Class OpenAI Agents Capture Adapter
+
+Goal: let users capture and check OpenAI Agents SDK test runs without manually creating spans or AgentLint IR.
+
+Deliverables:
+
+1. Versioned OpenAI Agents snapshot contract.
+2. OpenAI Agents SDK trace processor integration.
+3. Fixture-first mapping tests that require no API calls.
+4. Capture-session lifecycle and deterministic trace flushing.
+5. Additive IR events for agent runs, handoffs, and guardrails.
+6. Mapping for model generations and function-tool call/result flows.
+7. Completeness profiles based on framework guarantees and observed capture incidents.
+8. One-line in-process activation and an explicitly activated pytest plugin.
+9. Optional live demo gated by `OPENAI_API_KEY` and a small explicit budget.
+
+Exit criteria:
+
+1. An existing supported agent test can be captured with at most one central setup step or explicit pytest activation.
+2. Existing AgentLint checks run without adapter-specific policy logic.
+3. Missing framework semantics are visible through completeness and warnings.
+4. Default tests remain offline and zero-cost.
+5. Empty, disabled, failed, and unsupported capture cannot appear as a clean pass.
+
+## Milestone 10: Semantic Capture and Verifiability
+
+Goal: prevent a clean policy result when evidence required by that policy was not captured, and provide focused helpers for semantics OpenAI Agents tracing cannot expose.
+
+Deliverables:
+
+1. Policy-specific minimum capture requirements using `partial` or `captured` levels.
+2. Framework-independent inference of evidence required by configured policy constructs.
+3. A `not_verifiable` trace outcome separate from violations and invalid input.
+4. Report schema v3 with unmet evidence requirements and aggregate counts.
+5. Nonzero CLI and pytest outcomes for invalid or not-verifiable traces independent of `--fail-on`.
+6. OpenAI capture helpers for authoritative approvals, declared source/sink flow, and final output.
+7. OpenAI adapter hardening for failures, retries, multiple traces, handoffs, guardrails, sensitive-data-disabled capture, and supported SDK versions.
+8. A realistic offline customer-support example with passing, failing, and not-verifiable scenarios.
+
+Exit criteria:
+
+1. A trace cannot pass when its effective policy evidence requirements are unmet.
+2. Known violations remain visible when unrelated evidence is incomplete.
+3. Users annotate only semantics unavailable from framework tracing and never write raw spans or AgentLint IR.
+4. Semantic helpers persist labels and relationships without raw source or sink values.
+5. The pytest workflow enforces violations, invalid traces, empty capture, and unverifiable results.
+6. Default tests remain offline and zero-cost.
+
+The finalized build plan is `Documents/milestone_10_implementation_plan.md`. OPA/Rego remains deferred until concrete policy-language limitations justify an experimental backend.
+
+## Milestone 11: Scope Alignment and Developer Workflow
+
+Goal: align implemented behavior with the offline deterministic trace-linting contract before expanding the product surface.
+
+Deliverables:
+
+1. One compiled rule plan shared by policy evaluation and evidence assessment.
+2. Focused policy activation that does not require unrelated evidence.
+3. Compiler-style diagnostic paths over explicit IR relationships.
+4. Improved semantic-helper ergonomics where public framework context is reliable.
+5. End-to-end tests for the primary pytest and one-line capture workflows.
+6. A realistic deterministic regression corpus with explicit realism tiers.
+7. Consumer documentation that distinguishes trace conformance from authorization, enforcement, and semantic evaluation.
+
+Exit criteria:
+
+1. A rule cannot require evidence unless that same compiled rule is active.
+2. Focused policies activate only implied or explicitly enabled checks.
+3. Diagnostic paths never invent relationships absent from the trace.
+4. Passed, failed, invalid, and not-verifiable outcomes are covered end to end.
+5. No runtime enforcement, automatic taint inference, or semantic fact-checking enters the milestone.
+
+The finalized build plan is `Documents/milestone_11_scope_alignment_implementation_plan.md`.
+
+## Milestone 12: Research Evaluation
 
 Goal: collect results suitable for a technical report or arXiv note.
 
@@ -336,11 +417,11 @@ Exit criteria:
 2. Claims about AgentLint's capabilities are backed by examples or measurements.
 3. Limitations are concrete rather than generic.
 
-## Milestone 10: Runtime Gating Prototype
+## Deferred Product Explorations
 
-Goal: explore online policy decisions after the offline linter is stable.
+Runtime gating is not a scheduled milestone for the initial AgentLint product. It may be reconsidered only after the offline linter has been evaluated with real users and must remain a separate product layer.
 
-Deliverables:
+A future runtime-gating research proposal could explore:
 
 1. Partial-trace representation.
 2. Pending-tool-call evaluation API.
@@ -352,11 +433,12 @@ Deliverables:
 4. Decision logs for later audit.
 5. Runtime-specific diagnostics for partial information.
 
-Exit criteria:
+Any such proposal must satisfy these boundaries:
 
 1. Runtime checks reuse the same IR, policies, and analysis concepts where possible.
 2. Partial-information limitations are explicit.
 3. Runtime mode is treated as a separate product surface, not a replacement for offline CI checks.
+4. Approval collection, identity management, and contextual authorization are not silently absorbed into the offline linter.
 
 ## Cross-Cutting Requirements
 

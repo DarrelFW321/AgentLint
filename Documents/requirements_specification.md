@@ -2,9 +2,9 @@
 
 ## 1. Overview
 
-AgentLint is a CI-oriented policy checker for AI agent execution traces.
+AgentLint is an offline, deterministic CI-oriented policy checker for recorded AI agent execution traces.
 
-It analyzes recorded or in-progress agent runs and checks whether the run satisfies developer-defined policies around tool use, data flow, approval requirements, and final-answer provenance.
+It analyzes completed agent runs and checks whether the represented behavior satisfies developer-defined policies around tool use, explicit data flow, recorded approvals, and explicit final-answer provenance.
 
 AgentLint does not attempt to prove that an agent is universally safe or correct. Instead, it verifies specific properties over concrete agent executions.
 
@@ -31,7 +31,7 @@ AgentLint should:
 3. Allow developers to define safety and correctness policies.
 4. Detect violations involving tool calls, data flow, approvals, and provenance.
 5. Produce clear, actionable reports suitable for local development and CI workflows.
-6. Support both offline trace analysis and, eventually, runtime policy gating.
+6. Refuse to report a pass when evidence required by the selected policy was not captured.
 
 ## 4. Non-Goals
 
@@ -43,6 +43,22 @@ AgentLint is not intended to:
 4. Judge overall answer quality in a subjective way.
 5. Act as a general-purpose LLM evaluation platform.
 6. Require all agent frameworks to adopt a new trace standard.
+7. Authorize or block production actions in the initial product.
+8. Provide approval user interfaces, identity management, or role management.
+9. Replace trace storage, observability, or security-operation platforms.
+10. Infer arbitrary data flow through Python, model reasoning, subprocesses, or external systems.
+11. Semantically prove that natural-language claims are true or supported.
+12. Serve as an enterprise compliance or policy-administration suite.
+
+## 4.1 Scope Contract
+
+AgentLint answers:
+
+> Did this recorded agent run violate a developer-defined policy that can be verified from the captured evidence?
+
+The initial product operates over explicit trace evidence. It may use framework-native relationships, adapter-provided semantics, or focused application annotations. Missing evidence is represented through capture completeness and `not_verifiable`; it is never silently interpreted as safe behavior.
+
+Authorization systems may emit decisions that AgentLint later verifies. Approval systems may emit grants or denials that AgentLint correlates with actions. AgentLint does not need to become either system to lint whether a completed trace respected their evidence.
 
 ## 5. Target Users
 
@@ -86,9 +102,9 @@ Reports should make it clear:
 - Why the behavior was unsafe.
 - How the developer might fix it.
 
-### 6.4 Runtime Gating
+### 6.4 Runtime Gating (Deferred Product Layer)
 
-In a later version, AgentLint may analyze partial traces while an agent is running and block, allow, warn, or escalate risky tool calls before they execute.
+Runtime gating is not part of the initial trace-linting product. A later, separately scoped product layer may analyze partial traces and block, allow, warn, or escalate risky tool calls before they execute. It should reuse normalized policy facts without changing the offline linter's evidence claims.
 
 Example runtime decisions:
 
@@ -163,6 +179,7 @@ It should:
 4. Preserve tool names, arguments, results, and metadata.
 5. Preserve references between calls and results where available.
 6. Report unsupported or ambiguous input fields clearly.
+7. Record which policy-relevant capabilities were captured, partially captured, unavailable, or unknown.
 
 ### 10.2 Trace Normalization
 
@@ -176,6 +193,8 @@ It should:
 4. Normalize timestamps or event ordering.
 5. Normalize data dependency information where available.
 6. Preserve raw references for debugging.
+
+Policy-declared tool-result sources and tool-argument sinks may enrich observed events with symbolic labels. Normalization must not infer a data-flow relationship merely because a source and sink boundary were both observed.
 
 ### 10.3 Structural Validation
 
@@ -197,7 +216,7 @@ AgentLint must check whether tool calls satisfy developer-defined policies.
 
 It should detect:
 
-1. Unauthorized tool calls.
+1. Tool calls denied by the trace policy.
 2. High-risk tools called without approval.
 3. Tool calls using disallowed input types.
 4. Tool calls made after explicit denial.
@@ -229,7 +248,7 @@ It should detect:
 4. Citations or provenance links that point to invalid events.
 5. Final answers that contradict tool results where this can be determined.
 
-For the initial version, provenance checking may rely on explicit provenance annotations or simple structured claim-to-evidence mappings. More advanced semantic claim validation may be added later.
+For the initial version, provenance checking relies on explicit provenance annotations or structured claim-to-evidence mappings. AgentLint validates existence, order, and declared relationships; it does not determine whether evidence semantically proves a natural-language claim. Any future probabilistic or domain-specific evaluator must be presented as a separate capability.
 
 ### 10.7 Approval Checking
 
@@ -257,8 +276,12 @@ Reports should include:
 6. Relevant trace events.
 7. Relevant policy rule.
 8. Suggested remediation where possible.
+9. Per-trace capture completeness for policy-relevant evidence.
+10. A clear limitation statement when checks pass over incomplete capture.
 
 Reports should be usable by both humans and automated systems.
+
+Capture completeness must remain separate from policy violations. It describes what the trace source observed and preserved, not whether the represented behavior was safe. Missing declarations must be reported as unknown rather than assumed complete.
 
 ### 10.9 CI Integration
 
@@ -308,7 +331,7 @@ AgentLint policies should be able to express rules such as:
 AgentLint should classify violations into categories such as:
 
 1. Structural trace error.
-2. Unauthorized tool call.
+2. Trace-policy-denied tool call.
 3. Missing approval.
 4. Private-to-public data flow.
 5. Secret exposure.
@@ -317,6 +340,7 @@ AgentLint should classify violations into categories such as:
 8. Invalid provenance reference.
 9. Unknown tool.
 10. Missing policy coverage.
+11. Policy result not verifiable because required evidence was unavailable or incomplete.
 
 ## 13. Output Requirements
 
@@ -335,9 +359,9 @@ Future versions may support:
 3. Security report formats.
 4. Visual trace graphs.
 
-## 14. Runtime Requirements
+## 14. Runtime Requirements (Deferred)
 
-The initial version should focus on offline analysis of recorded traces.
+The initial version is limited to offline analysis of recorded traces. The following items are deferred and are not initial product requirements.
 
 Future runtime support should allow AgentLint to:
 
@@ -415,6 +439,9 @@ The first version should include:
 10. Machine-readable reports.
 11. CI-compatible pass/fail behavior.
 12. Example policies and example traces.
+13. Capture-completeness reporting and a `not_verifiable` result when policy-required evidence is insufficient.
+
+Version 1 data-flow and provenance checks operate only on explicit represented relationships. Version 1 approval checks verify recorded decisions; they do not collect or enforce approvals. Version 1 tool permissions are trace conformance rules, not a complete contextual authorization system.
 
 ## 20. Future Scope
 
@@ -431,6 +458,8 @@ Future versions may include:
 9. Pull request annotations.
 10. Benchmark suites for common agent failure modes.
 
+Future items are candidates, not commitments. Runtime enforcement, semantic evaluation, dashboards, and compliance workflows must remain separable from the deterministic offline linter and should be added only in response to validated user demand.
+
 ## 21. Success Criteria
 
 AgentLint should be considered successful if it can:
@@ -443,6 +472,8 @@ AgentLint should be considered successful if it can:
 6. Demonstrate value on realistic agent failure scenarios.
 7. Clearly communicate its limitations.
 8. Support extension to additional frameworks and policies.
+9. Clearly distinguish a clean policy result from complete execution capture.
+10. Refuse to report a policy pass when evidence required by that policy is below its configured minimum.
 
 ## 22. Core Principle
 

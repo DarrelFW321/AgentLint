@@ -13,6 +13,11 @@ def format_diagnostic(diagnostic: Diagnostic) -> str:
         lines.append(f"  related events: {', '.join(diagnostic.related_events)}")
     if diagnostic.related_edges:
         lines.append(f"  related edges: {', '.join(diagnostic.related_edges)}")
+    if diagnostic.path is not None:
+        rendered = diagnostic.path.nodes[0].label
+        for edge, node in zip(diagnostic.path.edges, diagnostic.path.nodes[1:], strict=True):
+            rendered += f" --{edge.edge_type}--> {node.label}"
+        lines.append(f"  path: {rendered}")
     if diagnostic.policy_reference is not None:
         lines.append(f"  policy reference: {diagnostic.policy_reference}")
     if diagnostic.remediation is not None:

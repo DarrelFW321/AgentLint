@@ -6,11 +6,21 @@ from agentlint.diagnostics.explanations import (
     explain_diagnostic_code,
 )
 from agentlint.diagnostics.formatting import format_diagnostic, format_diagnostics
-from agentlint.diagnostics.models import Diagnostic, DiagnosticCode, Severity
+from agentlint.diagnostics.models import (
+    Diagnostic,
+    DiagnosticCode,
+    DiagnosticPath,
+    DiagnosticPathEdge,
+    DiagnosticPathNode,
+    Severity,
+)
 
 __all__ = [
     "Diagnostic",
     "DiagnosticCode",
+    "DiagnosticPath",
+    "DiagnosticPathEdge",
+    "DiagnosticPathNode",
     "DiagnosticExplanation",
     "Severity",
     "all_diagnostic_explanations",

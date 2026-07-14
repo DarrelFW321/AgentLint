@@ -1,0 +1,40 @@
+{
+  "schema_version": "agentlint.openai_agents.snapshot.v1",
+  "trace_id": "trace_fb585fcfe25f4f4397390ea6ad2f7442",
+  "workflow_name": "approval_not_observed",
+  "group_id": null,
+  "metadata": {},
+  "started_at": null,
+  "ended_at": null,
+  "sdk_version": "0.18.2",
+  "spans": [
+    {
+      "trace_id": "trace_fb585fcfe25f4f4397390ea6ad2f7442",
+      "span_id": "span_4f15f76e180d41ad800162c3",
+      "parent_id": null,
+      "started_at": null,
+      "ended_at": null,
+      "has_error": false,
+      "span_type": "agent",
+      "span_data": {
+        "name": "Customer support",
+        "handoffs": null,
+        "tools": null,
+        "output_type": null
+      }
+    },
+    {
+      "trace_id": "trace_fb585fcfe25f4f4397390ea6ad2f7442",
+      "span_id": "agentlint_final_trace_fb585fcfe25f4f4397390ea6ad2f7442",
+      "parent_id": null,
+      "started_at": null,
+      "ended_at": null,
+      "has_error": false,
+      "span_type": "agentlint_final_answer",
+      "span_data": {
+        "content": "Request handled."
+      }
+    }
+  ],
+  "capture_incidents": []
+}

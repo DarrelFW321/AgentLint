@@ -1,0 +1,57 @@
+{
+  "resourceSpans": [
+    {
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "22222222222222222222222222222222",
+              "spanId": "0000000000000001",
+              "name": "tool.call send_email",
+              "startTimeUnixNano": "100",
+              "endTimeUnixNano": "200",
+              "attributes": [
+                {
+                  "key": "agentlint.trace.id",
+                  "value": {
+                    "stringValue": "otel_missing_approval"
+                  }
+                },
+                {
+                  "key": "agentlint.event.type",
+                  "value": {
+                    "stringValue": "tool_call"
+                  }
+                },
+                {
+                  "key": "agentlint.event.id",
+                  "value": {
+                    "stringValue": "evt_send_email"
+                  }
+                },
+                {
+                  "key": "agentlint.sequence",
+                  "value": {
+                    "intValue": "0"
+                  }
+                },
+                {
+                  "key": "agentlint.tool.name",
+                  "value": {
+                    "stringValue": "send_email"
+                  }
+                },
+                {
+                  "key": "agentlint.tool.arguments_json",
+                  "value": {
+                    "stringValue": "{\"recipient\":\"customer@example.com\",\"body\":\"Your case has been updated.\"}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

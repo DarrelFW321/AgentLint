@@ -1,0 +1,98 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "otel_unsupported_metadata",
+  "metadata": {
+    "adapter": "opentelemetry",
+    "source_trace_id": "55555555555555555555555555555555"
+  },
+  "capture": {
+    "schema_version": "agentlint.capture.v1",
+    "adapter": "opentelemetry",
+    "adapter_version": null,
+    "framework": "opentelemetry",
+    "framework_version": null,
+    "capabilities": {
+      "agent_runs": {
+        "status": "partial",
+        "reason": "Generic spans do not guarantee an agent-run boundary."
+      },
+      "model_calls": {
+        "status": "partial",
+        "reason": "Only explicitly typed AgentLint model spans are recognized."
+      },
+      "tool_calls": {
+        "status": "partial",
+        "reason": "Only explicitly typed AgentLint tool spans are recognized."
+      },
+      "tool_arguments": {
+        "status": "partial",
+        "reason": "Arguments require a valid explicit JSON attribute."
+      },
+      "tool_results": {
+        "status": "partial",
+        "reason": "Results require explicitly typed AgentLint result spans."
+      },
+      "approvals": {
+        "status": "partial",
+        "reason": "Approvals require explicit AgentLint approval attributes."
+      },
+      "data_flow": {
+        "status": "partial",
+        "reason": "Only explicit AgentLint data-flow edges are preserved."
+      },
+      "provenance": {
+        "status": "partial",
+        "reason": "Only explicit claims and provenance edges are preserved."
+      },
+      "final_answers": {
+        "status": "partial",
+        "reason": "Only explicitly typed final-answer spans are recognized."
+      }
+    },
+    "notes": [
+      "Import incident recorded: OTEL_EDGE_TARGET_NOT_FOUND.",
+      "Import incident recorded: OTEL_SPAN_SKIPPED_MISSING_EVENT_TYPE.",
+      "Import incident recorded: OTEL_SPAN_SKIPPED_UNSUPPORTED_EVENT_TYPE."
+    ]
+  },
+  "events": [
+    {
+      "id": "evt_lookup_account",
+      "sequence": 2,
+      "timestamp": "500",
+      "actor": null,
+      "metadata": {
+        "otel_span_name": "tool.call lookup_account",
+        "otel_span_id": "0000000000000003"
+      },
+      "source_ref": {
+        "source": "opentelemetry",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "0000000000000003"
+      },
+      "type": "tool_call",
+      "tool_name": "lookup_account",
+      "arguments": {
+        "account_id": "acct_123"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "otel_data_flow_evt_lookup_account_evt_missing",
+      "type": "data_flow",
+      "from_event": "evt_lookup_account",
+      "to_event": "evt_missing",
+      "metadata": {},
+      "source_ref": {
+        "source": "opentelemetry",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "0000000000000003"
+      }
+    }
+  ]
+}

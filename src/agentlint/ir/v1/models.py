@@ -6,6 +6,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
+from agentlint.capture import CaptureCompleteness
+
 SCHEMA_VERSION = "agentlint.ir.v1"
 
 type JsonValue = str | int | float | bool | None | list[JsonValue] | dict[str, JsonValue]
@@ -91,6 +93,29 @@ class ModelCallEvent(EventBase):
     model: str | None = None
 
 
+class AgentRunEvent(EventBase):
+    """One agent invocation within a framework workflow."""
+
+    type: Literal["agent_run"]
+    agent_name: str = Field(min_length=1)
+
+
+class HandoffEvent(EventBase):
+    """Control transfer between agents."""
+
+    type: Literal["handoff"]
+    from_agent: str | None = None
+    to_agent: str | None = None
+
+
+class GuardrailEvent(EventBase):
+    """Framework guardrail execution."""
+
+    type: Literal["guardrail"]
+    guardrail_name: str = Field(min_length=1)
+    triggered: bool = False
+
+
 class ToolCallEvent(EventBase):
     """Tool call event."""
 
@@ -129,10 +154,13 @@ class FinalAnswerEvent(EventBase):
 Event = Annotated[
     UserMessageEvent
     | DeveloperInstructionEvent
+    | AgentRunEvent
     | ModelCallEvent
     | ToolCallEvent
     | ToolResultEvent
     | ApprovalEvent
+    | HandoffEvent
+    | GuardrailEvent
     | FinalAnswerEvent,
     Field(discriminator="type"),
 ]
@@ -155,5 +183,6 @@ class Trace(StrictModel):
     schema_version: Literal["agentlint.ir.v1"]
     trace_id: str = Field(min_length=1)
     metadata: TraceMetadata = Field(default_factory=TraceMetadata)
+    capture: CaptureCompleteness | None = None
     events: list[Event]
     edges: list[Edge] = Field(default_factory=list)

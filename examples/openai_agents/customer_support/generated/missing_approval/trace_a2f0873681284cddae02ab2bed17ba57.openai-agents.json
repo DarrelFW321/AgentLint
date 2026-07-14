@@ -1,0 +1,55 @@
+{
+  "schema_version": "agentlint.openai_agents.snapshot.v1",
+  "trace_id": "trace_a2f0873681284cddae02ab2bed17ba57",
+  "workflow_name": "missing_approval",
+  "group_id": null,
+  "metadata": {},
+  "started_at": null,
+  "ended_at": null,
+  "sdk_version": "0.18.2",
+  "spans": [
+    {
+      "trace_id": "trace_a2f0873681284cddae02ab2bed17ba57",
+      "span_id": "span_7b939ef0524c4b1cacf259ba",
+      "parent_id": null,
+      "started_at": null,
+      "ended_at": null,
+      "has_error": false,
+      "span_type": "agent",
+      "span_data": {
+        "name": "Customer support",
+        "handoffs": null,
+        "tools": null,
+        "output_type": null
+      }
+    },
+    {
+      "trace_id": "trace_a2f0873681284cddae02ab2bed17ba57",
+      "span_id": "span_c22eba48892d4e78b2aa2c4f",
+      "parent_id": "span_7b939ef0524c4b1cacf259ba",
+      "started_at": null,
+      "ended_at": null,
+      "has_error": false,
+      "span_type": "function",
+      "span_data": {
+        "name": "issue_refund",
+        "input": "{\"ticket_id\":\"T-100\"}",
+        "output": "refund queued",
+        "mcp_data": null
+      }
+    },
+    {
+      "trace_id": "trace_a2f0873681284cddae02ab2bed17ba57",
+      "span_id": "agentlint_final_trace_a2f0873681284cddae02ab2bed17ba57",
+      "parent_id": null,
+      "started_at": null,
+      "ended_at": null,
+      "has_error": false,
+      "span_type": "agentlint_final_answer",
+      "span_data": {
+        "content": "Request handled."
+      }
+    }
+  ],
+  "capture_incidents": []
+}

@@ -1,0 +1,93 @@
+{
+  "resourceSpans": [
+    {
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "55555555555555555555555555555555",
+              "spanId": "0000000000000001",
+              "name": "ordinary infrastructure span",
+              "startTimeUnixNano": "100",
+              "endTimeUnixNano": "200",
+              "attributes": [
+                {
+                  "key": "http.request.method",
+                  "value": {
+                    "stringValue": "POST"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "55555555555555555555555555555555",
+              "spanId": "0000000000000002",
+              "name": "unknown agent span",
+              "startTimeUnixNano": "300",
+              "endTimeUnixNano": "400",
+              "attributes": [
+                {
+                  "key": "agentlint.event.type",
+                  "value": {
+                    "stringValue": "memory_snapshot"
+                  }
+                },
+                {
+                  "key": "agentlint.event.id",
+                  "value": {
+                    "stringValue": "evt_memory"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "55555555555555555555555555555555",
+              "spanId": "0000000000000003",
+              "name": "tool.call lookup_account",
+              "startTimeUnixNano": "500",
+              "endTimeUnixNano": "600",
+              "attributes": [
+                {
+                  "key": "agentlint.trace.id",
+                  "value": {
+                    "stringValue": "otel_unsupported_metadata"
+                  }
+                },
+                {
+                  "key": "agentlint.event.type",
+                  "value": {
+                    "stringValue": "tool_call"
+                  }
+                },
+                {
+                  "key": "agentlint.event.id",
+                  "value": {
+                    "stringValue": "evt_lookup_account"
+                  }
+                },
+                {
+                  "key": "agentlint.tool.name",
+                  "value": {
+                    "stringValue": "lookup_account"
+                  }
+                },
+                {
+                  "key": "agentlint.tool.arguments_json",
+                  "value": {
+                    "stringValue": "{\"account_id\":\"acct_123\"}"
+                  }
+                },
+                {
+                  "key": "agentlint.data_flow.to",
+                  "value": {
+                    "stringValue": "evt_missing"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

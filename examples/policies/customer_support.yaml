@@ -62,7 +62,7 @@ sinks:
 
 rules:
   unknown_tool: error
-  unauthorized_tool_call: error
+  denied_tool_call: error
   disallowed_tool_argument: error
   missing_approval: error
   approval_after_action: error

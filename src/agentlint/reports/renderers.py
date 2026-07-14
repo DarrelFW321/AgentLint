@@ -13,6 +13,7 @@ def render_text_report(report: AgentLintReport) -> str:
         "AgentLint Report",
         (
             f"traces: {report.summary.passed} passed, {report.summary.failed} failed, "
+            f"{report.summary.not_verifiable} not verifiable, "
             f"{report.summary.invalid} invalid"
         ),
         (
@@ -20,6 +21,13 @@ def render_text_report(report: AgentLintReport) -> str:
             f"{report.summary.diagnostics.error} error, "
             f"{report.summary.diagnostics.warning} warning, "
             f"{report.summary.diagnostics.info} info"
+        ),
+        (
+            "capture: "
+            f"{report.summary.capture.captured} captured, "
+            f"{report.summary.capture.partial} partial, "
+            f"{report.summary.capture.unavailable} unavailable, "
+            f"{report.summary.capture.unknown} unknown"
         ),
         f"fail-on: {report.summary.fail_on.value}",
         (
@@ -55,8 +63,23 @@ def _render_trace_result(result: TraceCheckResult) -> list[str]:
         [
             f"events: {result.events}",
             f"edges: {result.edges}",
+            f"capture: {result.capture.overall_status.value} ({result.capture.adapter})",
         ]
     )
+
+    for capability, coverage in result.capture.capabilities.entries():
+        label = capability.value.replace("_", " ")
+        reason = f" - {coverage.reason}" if coverage.reason is not None else ""
+        lines.append(f"  {label}: {coverage.status.value}{reason}")
+
+    if result.evidence.unmet:
+        lines.append("unmet evidence requirements:")
+        for requirement in result.evidence.unmet:
+            label = requirement.capability.value.replace("_", " ")
+            lines.append(
+                f"  {label}: requires {requirement.required.value}, "
+                f"observed {requirement.observed.value} ({requirement.origin.value})"
+            )
 
     if result.input_error is not None:
         lines.append(f"input error[{result.input_error.kind.value}]: {result.input_error.message}")
@@ -66,5 +89,16 @@ def _render_trace_result(result: TraceCheckResult) -> list[str]:
     if result.diagnostics:
         lines.append("")
         lines.append("\n".join(format_diagnostic(diagnostic) for diagnostic in result.diagnostics))
+
+    if result.status.value == "passed" and result.capture.overall_status.value != "captured":
+        lines.extend(
+            [
+                "",
+                (
+                    "Policy checks passed for the behavior represented in the trace; "
+                    "incomplete capture limited verification."
+                ),
+            ]
+        )
 
     return lines

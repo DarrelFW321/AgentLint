@@ -7,8 +7,9 @@ from agentlint.cli import app
 from agentlint.version import __version__
 
 runner = CliRunner()
-TRACE_DIR = Path(__file__).resolve().parents[1] / "examples" / "traces"
-POLICY_DIR = Path(__file__).resolve().parents[1] / "examples" / "policies"
+ROOT = Path(__file__).resolve().parents[1]
+TRACE_DIR = ROOT / "examples" / "traces"
+POLICY_DIR = ROOT / "examples" / "policies"
 
 
 def test_help_exits_successfully() -> None:
@@ -18,6 +19,7 @@ def test_help_exits_successfully() -> None:
     assert "agentlint" in result.output.lower()
     assert "version" in result.output
     assert "doctor" in result.output
+    assert "import" in result.output
     assert "policy" in result.output
     assert "check" in result.output
     assert "explain" in result.output
@@ -156,7 +158,7 @@ def test_check_succeeds_for_passing_trace() -> None:
 
     assert result.exit_code == 0
     assert "AgentLint Report" in result.stdout
-    assert "traces: 1 passed, 0 failed, 0 invalid" in result.stdout
+    assert "traces: 1 passed, 0 failed, 0 not verifiable, 0 invalid" in result.stdout
     assert "diagnostics: 0 error, 0 warning, 0 info" in result.stdout
     assert result.stderr == ""
 
@@ -195,9 +197,33 @@ def test_check_json_outputs_parseable_json_only() -> None:
     assert result.stderr == ""
 
     report = json.loads(result.stdout)
-    assert report["schema_version"] == "agentlint.report.v1"
+    assert report["schema_version"] == "agentlint.report.v4"
+    assert report["summary"]["capture"]["unknown"] == 1
     assert report["summary"]["diagnostics"]["error"] == 1
     assert report["runs"][0]["diagnostics"][0]["code"] == "UNKNOWN_TOOL"
+
+
+def test_import_openai_agents_writes_native_trace(tmp_path: Path) -> None:
+    snapshot = (
+        ROOT / "examples" / "external" / "openai_agents" / ("function_handoff_guardrail.json")
+    )
+    output = tmp_path / "openai.agentlint.json"
+
+    result = runner.invoke(
+        app,
+        ["import", "openai-agents", str(snapshot), "--output", str(output)],
+    )
+
+    assert result.exit_code == 0
+    assert "imported trace: trace_openai_support" in result.stdout
+    assert "events: 6" in result.stdout
+    assert "capture: unavailable" in result.stdout
+    assert output.is_file()
+    from agentlint.ir.v1 import load_native_trace
+
+    trace = load_native_trace(output)
+    model_call = next(event for event in trace.events if event.type == "model_call")
+    assert model_call.input is None  # type: ignore[union-attr]
 
 
 def test_check_warning_only_respects_fail_on_threshold() -> None:
@@ -378,8 +404,24 @@ def test_policy_validate_succeeds_for_valid_policy() -> None:
     assert "sources: 3" in result.stdout
     assert "sinks: 3" in result.stdout
     assert "rules: 14" in result.stdout
+    assert "active checks:" in result.stdout
+    assert "inferred evidence:" in result.stdout
     assert "exceptions: 1" in result.stdout
     assert result.stderr == ""
+
+
+def test_policy_validate_explains_focused_checks_and_evidence() -> None:
+    result = runner.invoke(
+        app,
+        ["policy", "validate", str(POLICY_DIR / "starter_approval.yaml")],
+    )
+
+    assert result.exit_code == 0
+    assert (
+        "active checks: unknown_tool, denied_tool_call, missing_approval, "
+        "approval_after_action, action_after_denial, approval_mismatch"
+    ) in result.stdout
+    assert "inferred evidence: tool_calls>=partial, approvals>=partial" in result.stdout
 
 
 def test_policy_validate_fails_for_invalid_schema() -> None:

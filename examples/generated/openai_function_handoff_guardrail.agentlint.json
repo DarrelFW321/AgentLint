@@ -1,0 +1,237 @@
+{
+  "schema_version": "agentlint.ir.v1",
+  "trace_id": "trace_openai_support",
+  "metadata": {
+    "adapter": "openai_agents",
+    "workflow_name": "Support workflow",
+    "group_id": "test_support"
+  },
+  "capture": {
+    "schema_version": "agentlint.capture.v1",
+    "adapter": "openai_agents",
+    "adapter_version": null,
+    "framework": "openai_agents",
+    "framework_version": "0.18.1",
+    "capabilities": {
+      "agent_runs": {
+        "status": "captured",
+        "reason": null
+      },
+      "model_calls": {
+        "status": "captured",
+        "reason": null
+      },
+      "tool_calls": {
+        "status": "partial",
+        "reason": "Function tools are captured; other tool families are not complete in M9."
+      },
+      "tool_arguments": {
+        "status": "partial",
+        "reason": "Arguments depend on SDK sensitive-data capture and valid JSON input."
+      },
+      "tool_results": {
+        "status": "partial",
+        "reason": "Results depend on supported completed function spans."
+      },
+      "approvals": {
+        "status": "unavailable",
+        "reason": "General approval decisions are not exposed by tracing spans."
+      },
+      "data_flow": {
+        "status": "unavailable",
+        "reason": "Span parentage is not value-level data flow."
+      },
+      "provenance": {
+        "status": "unavailable",
+        "reason": "SDK tracing does not provide claim-evidence semantics."
+      },
+      "final_answers": {
+        "status": "unavailable",
+        "reason": "Tracing spans do not expose authoritative RunResult final output."
+      }
+    },
+    "notes": []
+  },
+  "events": [
+    {
+      "id": "span_agent",
+      "sequence": 0,
+      "timestamp": "2026-07-13T12:00:00Z",
+      "actor": null,
+      "metadata": {},
+      "source_ref": {
+        "source": "openai_agents",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "span_agent"
+      },
+      "type": "agent_run",
+      "agent_name": "Support agent"
+    },
+    {
+      "id": "span_response",
+      "sequence": 1,
+      "timestamp": "2026-07-13T12:00:01Z",
+      "actor": null,
+      "metadata": {
+        "openai_response_id": "resp_synthetic"
+      },
+      "source_ref": {
+        "source": "openai_agents",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "span_response"
+      },
+      "type": "model_call",
+      "input": null,
+      "output": null,
+      "model": null
+    },
+    {
+      "id": "span_function:call",
+      "sequence": 2,
+      "timestamp": "2026-07-13T12:00:03Z",
+      "actor": null,
+      "metadata": {},
+      "source_ref": {
+        "source": "openai_agents",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "span_function"
+      },
+      "type": "tool_call",
+      "tool_name": "send_email",
+      "arguments": {
+        "recipient": "customer@example.test",
+        "body": "Synthetic update."
+      }
+    },
+    {
+      "id": "span_function:result",
+      "sequence": 3,
+      "timestamp": "2026-07-13T12:00:04Z",
+      "actor": null,
+      "metadata": {},
+      "source_ref": {
+        "source": "openai_agents",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "span_function"
+      },
+      "type": "tool_result",
+      "tool_name": "send_email",
+      "call_id": "span_function:call",
+      "result": "sent"
+    },
+    {
+      "id": "span_guardrail",
+      "sequence": 4,
+      "timestamp": "2026-07-13T12:00:04Z",
+      "actor": null,
+      "metadata": {},
+      "source_ref": {
+        "source": "openai_agents",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "span_guardrail"
+      },
+      "type": "guardrail",
+      "guardrail_name": "safe_output",
+      "triggered": false
+    },
+    {
+      "id": "span_handoff",
+      "sequence": 5,
+      "timestamp": "2026-07-13T12:00:05Z",
+      "actor": null,
+      "metadata": {},
+      "source_ref": {
+        "source": "openai_agents",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "span_handoff"
+      },
+      "type": "handoff",
+      "from_agent": "Support agent",
+      "to_agent": "Escalation agent"
+    }
+  ],
+  "edges": [
+    {
+      "id": "openai_parent_span_agent_span_response",
+      "type": "parent",
+      "from_event": "span_agent",
+      "to_event": "span_response",
+      "metadata": {},
+      "source_ref": {
+        "source": "openai_agents",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "span_response"
+      }
+    },
+    {
+      "id": "openai_parent_span_agent_span_function:call",
+      "type": "parent",
+      "from_event": "span_agent",
+      "to_event": "span_function:call",
+      "metadata": {},
+      "source_ref": {
+        "source": "openai_agents",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "span_function"
+      }
+    },
+    {
+      "id": "openai_parent_span_function:call_span_function:result",
+      "type": "parent",
+      "from_event": "span_function:call",
+      "to_event": "span_function:result",
+      "metadata": {},
+      "source_ref": {
+        "source": "openai_agents",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "span_function"
+      }
+    },
+    {
+      "id": "openai_parent_span_agent_span_guardrail",
+      "type": "parent",
+      "from_event": "span_agent",
+      "to_event": "span_guardrail",
+      "metadata": {},
+      "source_ref": {
+        "source": "openai_agents",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "span_guardrail"
+      }
+    },
+    {
+      "id": "openai_parent_span_agent_span_handoff",
+      "type": "parent",
+      "from_event": "span_agent",
+      "to_event": "span_handoff",
+      "metadata": {},
+      "source_ref": {
+        "source": "openai_agents",
+        "path": null,
+        "line": null,
+        "column": null,
+        "raw_id": "span_handoff"
+      }
+    }
+  ]
+}

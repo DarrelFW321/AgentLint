@@ -1,0 +1,254 @@
+version: 1
+fixtures:
+  - id: native_minimal_valid
+    trace: examples/traces/native_minimal_valid.json
+    categories: [passing, native]
+    expected_status: passed
+    expected_diagnostics: []
+
+  - id: native_tool_flow_valid
+    trace: examples/traces/native_tool_flow_valid.json
+    categories: [passing, native]
+    expected_status: passed
+    expected_diagnostics: []
+
+  - id: structural_valid_tool_flow
+    trace: examples/traces/structural_valid_tool_flow.json
+    categories: [passing, structural, report, performance]
+    expected_status: passed
+    expected_diagnostics: []
+    expected_report: examples/expected_reports/structural_valid_tool_flow.json
+    report_cases: [json, text]
+    performance: true
+
+  - id: native_malformed
+    trace: examples/traces/native_malformed.json
+    categories: [malformed, invalid]
+    expected_status: invalid
+    expected_diagnostics: []
+
+  - id: native_invalid_schema
+    trace: examples/traces/native_invalid_schema.json
+    categories: [malformed, invalid, report]
+    expected_status: invalid
+    expected_diagnostics: []
+    expected_report: examples/expected_reports/native_invalid_schema.json
+    report_cases: [json, text]
+    report_fail_on: never
+
+  - id: native_invalid_missing_event_ref
+    trace: examples/traces/native_invalid_missing_event_ref.json
+    categories: [structural]
+    expected_status: failed
+    expected_diagnostics: [MISSING_EVENT_REFERENCE]
+
+  - id: structural_duplicate_event_id
+    trace: examples/traces/structural_duplicate_event_id.json
+    categories: [structural, report]
+    expected_status: failed
+    expected_diagnostics: [DUPLICATE_EVENT_ID]
+    expected_report: examples/expected_reports/structural_duplicate_event_id.json
+    report_cases: [json, text]
+
+  - id: structural_duplicate_edge_id
+    trace: examples/traces/structural_duplicate_edge_id.json
+    categories: [structural]
+    expected_status: failed
+    expected_diagnostics: [DUPLICATE_EDGE_ID]
+
+  - id: structural_missing_event_reference
+    trace: examples/traces/structural_missing_event_reference.json
+    categories: [structural]
+    expected_status: failed
+    expected_diagnostics: [MISSING_EVENT_REFERENCE]
+
+  - id: structural_invalid_event_order
+    trace: examples/traces/structural_invalid_event_order.json
+    categories: [structural]
+    expected_status: failed
+    expected_diagnostics: [INVALID_EVENT_ORDER]
+
+  - id: structural_invalid_evidence_reference
+    trace: examples/traces/structural_invalid_evidence_reference.json
+    categories: [structural]
+    expected_status: failed
+    expected_diagnostics: [INVALID_EVIDENCE_REFERENCE]
+
+  - id: structural_tool_call_missing_arguments
+    trace: examples/traces/structural_tool_call_missing_arguments.json
+    categories: [structural]
+    expected_status: failed
+    expected_diagnostics: [TOOL_CALL_MISSING_ARGUMENTS]
+
+  - id: structural_tool_result_without_call
+    trace: examples/traces/structural_tool_result_without_call.json
+    categories: [structural]
+    expected_status: failed
+    expected_diagnostics: [TOOL_RESULT_WITHOUT_MATCHING_CALL]
+
+  - id: policy_tool_valid
+    trace: examples/traces/policy_tool_valid.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [passing, policy, report, performance]
+    expected_status: passed
+    expected_diagnostics: []
+    expected_report: examples/expected_reports/policy_tool_valid.json
+    report_cases: [json, text]
+    performance: true
+
+  - id: policy_not_verifiable
+    trace: examples/traces/native_minimal_valid.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, capture, report]
+    expected_status: not_verifiable
+    expected_diagnostics: []
+    expected_report: examples/expected_reports/policy_not_verifiable.json
+    report_cases: [json, text]
+
+  - id: policy_approval_valid
+    trace: examples/traces/policy_approval_valid.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [passing, policy, performance]
+    expected_status: passed
+    expected_diagnostics: []
+    performance: true
+
+  - id: policy_data_flow_valid
+    trace: examples/traces/policy_data_flow_valid.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [passing, policy, performance]
+    expected_status: passed
+    expected_diagnostics: []
+    performance: true
+
+  - id: policy_provenance_valid
+    trace: examples/traces/policy_provenance_valid.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [passing, policy, performance]
+    expected_status: passed
+    expected_diagnostics: []
+    performance: true
+
+  - id: policy_unknown_tool
+    trace: examples/traces/policy_unknown_tool.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, tool, report, performance]
+    expected_status: failed
+    expected_diagnostics: [UNKNOWN_TOOL]
+    expected_report: examples/expected_reports/policy_unknown_tool.json
+    report_cases: [json, text]
+    performance: true
+
+  - id: policy_denied_tool_call
+    trace: examples/traces/policy_denied_tool_call.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, tool]
+    expected_status: failed
+    expected_diagnostics: [DENIED_TOOL_CALL]
+
+  - id: policy_disallowed_tool_argument
+    trace: examples/traces/policy_disallowed_tool_argument.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, tool]
+    expected_status: failed
+    expected_diagnostics: [DISALLOWED_TOOL_ARGUMENT]
+
+  - id: policy_missing_approval
+    trace: examples/traces/policy_missing_approval.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, approval, performance]
+    expected_status: failed
+    expected_diagnostics: [MISSING_APPROVAL]
+    performance: true
+
+  - id: policy_approval_after_action
+    trace: examples/traces/policy_approval_after_action.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, approval]
+    expected_status: failed
+    expected_diagnostics: [APPROVAL_AFTER_ACTION]
+
+  - id: policy_action_after_denial
+    trace: examples/traces/policy_action_after_denial.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, approval]
+    expected_status: failed
+    expected_diagnostics: [ACTION_AFTER_DENIAL]
+
+  - id: policy_approval_mismatch
+    trace: examples/traces/policy_approval_mismatch.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, approval]
+    expected_status: failed
+    expected_diagnostics: [APPROVAL_MISMATCH]
+
+  - id: policy_private_to_public_sink
+    trace: examples/traces/policy_private_to_public_sink.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, data_flow, redaction, performance]
+    expected_status: failed
+    expected_diagnostics: [PRIVATE_TO_PUBLIC_SINK]
+    redaction_forbidden_strings:
+      - Customer profile details.
+      - customer profile details
+    performance: true
+
+  - id: policy_secret_exposure
+    trace: examples/traces/policy_secret_exposure.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, data_flow, redaction]
+    expected_status: failed
+    expected_diagnostics: [SECRET_EXPOSURE]
+    redaction_forbidden_strings:
+      - Use the environment secret.
+      - environment secret
+
+  - id: policy_untrusted_to_privileged_action
+    trace: examples/traces/policy_untrusted_to_privileged_action.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, data_flow]
+    expected_status: failed
+    expected_diagnostics: [UNTRUSTED_TO_PRIVILEGED_ACTION]
+
+  - id: policy_sensitive_final_answer
+    trace: examples/traces/policy_sensitive_final_answer.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, data_flow, redaction, report]
+    expected_status: failed
+    expected_diagnostics: [SENSITIVE_FINAL_ANSWER]
+    expected_report: examples/expected_reports/policy_sensitive_final_answer.json
+    report_cases: [json, text]
+    redaction_forbidden_strings:
+      - Customer profile details.
+      - The customer profile says the account is active.
+
+  - id: policy_unsupported_claim
+    trace: examples/traces/policy_unsupported_claim.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, provenance]
+    expected_status: failed
+    expected_diagnostics: [UNSUPPORTED_CLAIM]
+
+  - id: policy_invalid_provenance_reference
+    trace: examples/traces/policy_invalid_provenance_reference.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [policy, provenance]
+    expected_status: failed
+    expected_diagnostics: [INVALID_PROVENANCE_REFERENCE]
+
+  - id: policy_evidence_after_claim
+    trace: examples/traces/policy_evidence_after_claim.json
+    policy: examples/policies/policy_checks_warning_only.yaml
+    categories: [policy, provenance]
+    expected_status: failed
+    expected_diagnostics: [EVIDENCE_AFTER_CLAIM]
+
+  - id: openai_agents_missing_approval
+    trace: examples/generated/openai_function_handoff_guardrail.agentlint.json
+    policy: examples/policies/policy_checks.yaml
+    categories: [adapter, openai_agents, policy, redaction]
+    expected_status: failed
+    expected_diagnostics: [MISSING_APPROVAL]
+    redaction_forbidden_strings:
+      - customer@example.test
+      - Synthetic update.

@@ -1,0 +1,134 @@
+{
+  "schema_version": "agentlint.report.v4",
+  "agentlint_version": "0.0.0",
+  "summary": {
+    "trace_count": 1,
+    "passed": 1,
+    "failed": 0,
+    "not_verifiable": 0,
+    "invalid": 0,
+    "diagnostics": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    },
+    "capture": {
+      "captured": 1,
+      "partial": 0,
+      "unavailable": 0,
+      "unknown": 0
+    },
+    "fail_on": "error",
+    "failed_threshold": false,
+    "unmet_evidence": {}
+  },
+  "runs": [
+    {
+      "trace_path": "examples\\traces\\policy_tool_valid.json",
+      "trace_id": "trace_policy_tool_valid",
+      "policy_id": "policy_checks_v1",
+      "status": "passed",
+      "events": 1,
+      "edges": 0,
+      "capture": {
+        "schema_version": "agentlint.capture.v1",
+        "adapter": "native_fixture",
+        "adapter_version": null,
+        "framework": null,
+        "framework_version": null,
+        "capabilities": {
+          "agent_runs": {
+            "status": "captured",
+            "reason": null
+          },
+          "model_calls": {
+            "status": "captured",
+            "reason": null
+          },
+          "tool_calls": {
+            "status": "captured",
+            "reason": null
+          },
+          "tool_arguments": {
+            "status": "captured",
+            "reason": null
+          },
+          "tool_results": {
+            "status": "captured",
+            "reason": null
+          },
+          "approvals": {
+            "status": "captured",
+            "reason": null
+          },
+          "data_flow": {
+            "status": "captured",
+            "reason": null
+          },
+          "provenance": {
+            "status": "captured",
+            "reason": null
+          },
+          "final_answers": {
+            "status": "captured",
+            "reason": null
+          }
+        },
+        "notes": []
+      },
+      "evidence": {
+        "requirements": [
+          {
+            "capability": "tool_calls",
+            "required": "partial",
+            "observed": "captured",
+            "origin": "inferred",
+            "reason": "No capture explanation was provided."
+          },
+          {
+            "capability": "tool_arguments",
+            "required": "partial",
+            "observed": "captured",
+            "origin": "inferred",
+            "reason": "No capture explanation was provided."
+          },
+          {
+            "capability": "approvals",
+            "required": "partial",
+            "observed": "captured",
+            "origin": "inferred",
+            "reason": "No capture explanation was provided."
+          },
+          {
+            "capability": "data_flow",
+            "required": "partial",
+            "observed": "captured",
+            "origin": "inferred",
+            "reason": "No capture explanation was provided."
+          },
+          {
+            "capability": "provenance",
+            "required": "partial",
+            "observed": "captured",
+            "origin": "inferred",
+            "reason": "No capture explanation was provided."
+          },
+          {
+            "capability": "final_answers",
+            "required": "partial",
+            "observed": "captured",
+            "origin": "inferred",
+            "reason": "No capture explanation was provided."
+          }
+        ],
+        "unmet": []
+      },
+      "diagnostics": [],
+      "input_error": null
+    }
+  ],
+  "redaction": {
+    "mode": "metadata_only",
+    "raw_values_included": false
+  }
+}

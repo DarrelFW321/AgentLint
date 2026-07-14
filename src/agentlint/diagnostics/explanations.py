@@ -78,12 +78,12 @@ _EXPLANATIONS = {
         meaning="A tool call uses a tool that is not declared in the active policy.",
         remediation="Add the tool to the policy or remove the tool call.",
     ),
-    DiagnosticCode.UNAUTHORIZED_TOOL_CALL: DiagnosticExplanation(
-        code=DiagnosticCode.UNAUTHORIZED_TOOL_CALL,
+    DiagnosticCode.DENIED_TOOL_CALL: DiagnosticExplanation(
+        code=DiagnosticCode.DENIED_TOOL_CALL,
         category="policy",
         kind="tool policy",
         meaning="A tool call uses a tool that the active policy marks as denied.",
-        remediation="Do not call denied tools, or update the policy if the tool should be allowed.",
+        remediation="Remove the call or update the trace policy if the tool should be permitted.",
     ),
     DiagnosticCode.DISALLOWED_TOOL_ARGUMENT: DiagnosticExplanation(
         code=DiagnosticCode.DISALLOWED_TOOL_ARGUMENT,
@@ -176,6 +176,8 @@ _EXPLANATIONS = {
 
 def explain_diagnostic_code(code: DiagnosticCode | str) -> DiagnosticExplanation | None:
     """Return an explanation for a diagnostic code."""
+    if isinstance(code, str) and code.upper() == "UNAUTHORIZED_TOOL_CALL":
+        code = DiagnosticCode.DENIED_TOOL_CALL
     try:
         diagnostic_code = code if isinstance(code, DiagnosticCode) else DiagnosticCode(code.upper())
     except ValueError:

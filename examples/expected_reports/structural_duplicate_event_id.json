@@ -1,0 +1,104 @@
+{
+  "schema_version": "agentlint.report.v4",
+  "agentlint_version": "0.0.0",
+  "summary": {
+    "trace_count": 1,
+    "passed": 0,
+    "failed": 1,
+    "not_verifiable": 0,
+    "invalid": 0,
+    "diagnostics": {
+      "error": 1,
+      "warning": 0,
+      "info": 0
+    },
+    "capture": {
+      "captured": 0,
+      "partial": 0,
+      "unavailable": 0,
+      "unknown": 1
+    },
+    "fail_on": "error",
+    "failed_threshold": true,
+    "unmet_evidence": {}
+  },
+  "runs": [
+    {
+      "trace_path": "examples\\traces\\structural_duplicate_event_id.json",
+      "trace_id": "trace_structural_duplicate_event_id",
+      "policy_id": null,
+      "status": "failed",
+      "events": 2,
+      "edges": 0,
+      "capture": {
+        "schema_version": "agentlint.capture.v1",
+        "adapter": "native",
+        "adapter_version": null,
+        "framework": null,
+        "framework_version": null,
+        "capabilities": {
+          "agent_runs": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "model_calls": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "tool_calls": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "tool_arguments": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "tool_results": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "approvals": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "data_flow": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "provenance": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "final_answers": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          }
+        },
+        "notes": []
+      },
+      "evidence": {
+        "requirements": [],
+        "unmet": []
+      },
+      "diagnostics": [
+        {
+          "code": "DUPLICATE_EVENT_ID",
+          "severity": "error",
+          "message": "duplicate event id \"evt_duplicate\"",
+          "related_events": [
+            "evt_duplicate"
+          ],
+          "related_edges": [],
+          "path": null,
+          "policy_reference": null,
+          "remediation": "Ensure every event id is unique within the trace."
+        }
+      ],
+      "input_error": null
+    }
+  ],
+  "redaction": {
+    "mode": "metadata_only",
+    "raw_values_included": false
+  }
+}

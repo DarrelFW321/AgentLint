@@ -32,6 +32,12 @@ def test_load_policy_loads_customer_support_example() -> None:
         "policy_checks.yaml",
         "policy_checks_warning_only.yaml",
         "policy_checks_with_exception.yaml",
+        "openai_function_tools.yaml",
+        "starter_tools.yaml",
+        "starter_approval.yaml",
+        "starter_data_flow.yaml",
+        "starter_provenance.yaml",
+        "../openai_agents/live_policy_agent/agentlint.yaml",
     ],
 )
 def test_load_policy_loads_valid_examples(fixture_name: str) -> None:

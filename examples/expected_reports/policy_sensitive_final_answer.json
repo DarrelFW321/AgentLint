@@ -1,0 +1,215 @@
+{
+  "schema_version": "agentlint.report.v4",
+  "agentlint_version": "0.0.0",
+  "summary": {
+    "trace_count": 1,
+    "passed": 0,
+    "failed": 1,
+    "not_verifiable": 0,
+    "invalid": 0,
+    "diagnostics": {
+      "error": 0,
+      "warning": 1,
+      "info": 0
+    },
+    "capture": {
+      "captured": 0,
+      "partial": 0,
+      "unavailable": 0,
+      "unknown": 1
+    },
+    "fail_on": "error",
+    "failed_threshold": false,
+    "unmet_evidence": {
+      "approvals": 1,
+      "data_flow": 1,
+      "final_answers": 1,
+      "provenance": 1,
+      "tool_arguments": 1,
+      "tool_calls": 1
+    }
+  },
+  "runs": [
+    {
+      "trace_path": "examples\\traces\\policy_sensitive_final_answer.json",
+      "trace_id": "trace_policy_sensitive_final_answer",
+      "policy_id": "policy_checks_v1",
+      "status": "failed",
+      "events": 2,
+      "edges": 1,
+      "capture": {
+        "schema_version": "agentlint.capture.v1",
+        "adapter": "native",
+        "adapter_version": null,
+        "framework": null,
+        "framework_version": null,
+        "capabilities": {
+          "agent_runs": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "model_calls": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "tool_calls": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "tool_arguments": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "tool_results": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "approvals": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "data_flow": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "provenance": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "final_answers": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          }
+        },
+        "notes": []
+      },
+      "evidence": {
+        "requirements": [
+          {
+            "capability": "tool_calls",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "tool_arguments",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "approvals",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "data_flow",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "provenance",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "final_answers",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          }
+        ],
+        "unmet": [
+          {
+            "capability": "tool_calls",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "tool_arguments",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "approvals",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "data_flow",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "provenance",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "final_answers",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          }
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "SENSITIVE_FINAL_ANSWER",
+          "severity": "warning",
+          "message": "sensitive source \"customer_profile\" reaches final answer \"evt_final\"",
+          "related_events": [
+            "evt_customer_profile",
+            "evt_final"
+          ],
+          "related_edges": [],
+          "path": {
+            "nodes": [
+              {
+                "event_id": "evt_customer_profile",
+                "label": "user_message"
+              },
+              {
+                "event_id": "evt_final",
+                "label": "final_answer"
+              }
+            ],
+            "edges": [
+              {
+                "edge_id": "edge_data_customer_to_final",
+                "edge_type": "data_flow"
+              }
+            ]
+          },
+          "policy_reference": "policy_checks_v1:sensitive_final_answer",
+          "remediation": "Avoid exposing private or secret source data in final answers."
+        }
+      ],
+      "input_error": null
+    }
+  ],
+  "redaction": {
+    "mode": "metadata_only",
+    "raw_values_included": false
+  }
+}

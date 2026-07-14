@@ -9,6 +9,9 @@ from typing import Annotated
 
 import typer
 
+from agentlint.adapters.openai_agents import import_openai_agents_file
+from agentlint.adapters.openai_snapshot import OpenAISnapshotError
+from agentlint.adapters.opentelemetry import OpenTelemetryImportError, import_opentelemetry_file
 from agentlint.checking import check_trace_file
 from agentlint.diagnostics import Severity, explain_diagnostic_code, format_diagnostics
 from agentlint.ir.v1 import (
@@ -26,6 +29,7 @@ from agentlint.policy import (
     PolicyLoadError,
     PolicySchemaError,
     PolicyYamlError,
+    compile_policy,
     format_policy_validation_error,
     load_policy,
 )
@@ -51,8 +55,15 @@ policy_app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
 )
+import_app = typer.Typer(
+    name="import",
+    help="Import external trace formats into native AgentLint IR.",
+    no_args_is_help=True,
+    add_completion=False,
+)
 
 app.add_typer(policy_app, name="policy")
+app.add_typer(import_app, name="import")
 
 
 @app.command()
@@ -181,6 +192,75 @@ def validate_policy(
     _echo_policy_summary(policy)
 
 
+@import_app.command("opentelemetry")
+def import_opentelemetry(
+    input_path: Annotated[Path, typer.Argument(help="OpenTelemetry OTLP-style JSON trace file.")],
+    output_path: Annotated[
+        Path,
+        typer.Option("--output", help="Output native AgentLint trace JSON file."),
+    ],
+) -> None:
+    """Import an OpenTelemetry trace into native AgentLint IR."""
+    try:
+        result = import_opentelemetry_file(input_path)
+    except OpenTelemetryImportError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(1) from exc
+
+    for warning in result.warnings:
+        typer.echo(f"warning[{warning.code}]: {warning.message}", err=True)
+
+    try:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(
+            result.trace.model_dump_json(indent=2),
+            encoding="utf-8",
+        )
+    except OSError as exc:
+        typer.echo(f"error: could not write output trace {output_path}: {exc}", err=True)
+        raise typer.Exit(1) from exc
+
+    typer.echo(f"imported trace: {result.trace.trace_id}")
+    typer.echo(f"events: {len(result.trace.events)}")
+    typer.echo(f"edges: {len(result.trace.edges)}")
+    typer.echo(f"warnings: {len(result.warnings)}")
+    typer.echo(f"capture: {result.capture.overall_status.value}")
+
+
+@import_app.command("openai-agents")
+def import_openai_agents(
+    input_path: Annotated[Path, typer.Argument(help="OpenAI Agents snapshot JSON file.")],
+    output_path: Annotated[
+        Path,
+        typer.Option("--output", help="Output native AgentLint trace JSON file."),
+    ],
+) -> None:
+    """Import an OpenAI Agents SDK snapshot into native AgentLint IR."""
+    try:
+        result = import_openai_agents_file(input_path)
+    except OpenAISnapshotError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(1) from exc
+
+    for warning in result.warnings:
+        typer.echo(f"warning[{warning.code}]: {warning.message}", err=True)
+    try:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(
+            result.trace.model_dump_json(indent=2),
+            encoding="utf-8",
+        )
+    except OSError as exc:
+        typer.echo(f"error: could not write output trace {output_path}: {exc}", err=True)
+        raise typer.Exit(1) from exc
+
+    typer.echo(f"imported trace: {result.trace.trace_id}")
+    typer.echo(f"events: {len(result.trace.events)}")
+    typer.echo(f"edges: {len(result.trace.edges)}")
+    typer.echo(f"warnings: {len(result.warnings)}")
+    typer.echo(f"capture: {result.capture.overall_status.value}")
+
+
 def _load_policy_for_cli(policy_path: Path) -> Policy:
     try:
         return load_policy(policy_path)
@@ -195,12 +275,33 @@ def _load_policy_for_cli(policy_path: Path) -> Policy:
 
 
 def _echo_policy_summary(policy: Policy) -> None:
+    plan = compile_policy(policy)
+    inferred_evidence = plan.inferred_evidence()
+    result_boundaries = sum(tool.result is not None for tool in policy.tools.values())
+    argument_boundaries = sum(
+        argument.sink is not None
+        for tool in policy.tools.values()
+        for argument in tool.arguments.values()
+    )
     typer.echo(f"valid policy: {policy.policy_id}")
     typer.echo(f"version: {policy.version}")
     typer.echo(f"tools: {len(policy.tools)}")
-    typer.echo(f"sources: {len(policy.sources)}")
-    typer.echo(f"sinks: {len(policy.sinks)}")
+    typer.echo(f"sources: {len(policy.effective_sources())}")
+    typer.echo(f"sinks: {len(policy.effective_sinks())}")
+    typer.echo(
+        f"declared boundaries: {result_boundaries} result source, "
+        f"{argument_boundaries} argument sink"
+    )
     typer.echo(f"rules: {len(policy.rules)}")
+    active_rules = ", ".join(rule.value for rule in plan.rules) or "none"
+    typer.echo(f"active checks: {active_rules}")
+    evidence = (
+        ", ".join(
+            f"{capability.value}>={level.value}" for capability, level in inferred_evidence.items()
+        )
+        or "none"
+    )
+    typer.echo(f"inferred evidence: {evidence}")
     typer.echo(f"exceptions: {len(policy.exceptions)}")
 
 

@@ -7,7 +7,9 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from agentlint.capture import CaptureCompleteness, unknown_capture
 from agentlint.diagnostics import Diagnostic, Severity
+from agentlint.evidence import EvidenceAssessment, assess_evidence
 from agentlint.ir.v1 import (
     Trace,
     TraceFileError,
@@ -18,7 +20,7 @@ from agentlint.ir.v1 import (
     load_native_trace,
 )
 from agentlint.passes import evaluate_policy, validate_structure
-from agentlint.policy import Policy
+from agentlint.policy import Policy, compile_policy
 
 
 class TraceCheckStatus(StrEnum):
@@ -26,6 +28,7 @@ class TraceCheckStatus(StrEnum):
 
     PASSED = "passed"
     FAILED = "failed"
+    NOT_VERIFIABLE = "not_verifiable"
     INVALID = "invalid"
 
 
@@ -58,6 +61,8 @@ class TraceCheckResult(BaseModel):
     status: TraceCheckStatus
     events: int = Field(default=0, ge=0)
     edges: int = Field(default=0, ge=0)
+    capture: CaptureCompleteness
+    evidence: EvidenceAssessment
     diagnostics: list[Diagnostic] = Field(default_factory=list)
     input_error: InputError | None = None
 
@@ -71,16 +76,29 @@ def check_trace(
         diagnostic for diagnostic in diagnostics if diagnostic.severity == Severity.ERROR
     ]
 
+    plan = compile_policy(policy) if policy is not None else None
     if policy is not None and not structural_errors:
-        diagnostics.extend(evaluate_policy(trace, policy))
+        diagnostics.extend(evaluate_policy(trace, policy, plan=plan))
+
+    capture = trace.capture or unknown_capture(adapter="native")
+    evidence = assess_evidence(policy, capture, plan=plan)
+    status = (
+        TraceCheckStatus.FAILED
+        if diagnostics
+        else TraceCheckStatus.NOT_VERIFIABLE
+        if evidence.unmet
+        else TraceCheckStatus.PASSED
+    )
 
     return TraceCheckResult(
         trace_path=trace_path,
         trace_id=trace.trace_id,
         policy_id=policy.policy_id if policy is not None else None,
-        status=TraceCheckStatus.FAILED if diagnostics else TraceCheckStatus.PASSED,
+        status=status,
         events=len(trace.events),
         edges=len(trace.edges),
+        capture=capture,
+        evidence=evidence,
         diagnostics=diagnostics,
     )
 
@@ -126,5 +144,9 @@ def _invalid_trace_result(
         trace_path=str(trace_path),
         policy_id=policy.policy_id if policy is not None else None,
         status=TraceCheckStatus.INVALID,
+        capture=unknown_capture(
+            reason="Capture completeness is unknown because the trace could not be loaded."
+        ),
+        evidence=EvidenceAssessment(requirements=[], unmet=[]),
         input_error=input_error,
     )

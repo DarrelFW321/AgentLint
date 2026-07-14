@@ -40,6 +40,12 @@ dev = [
   "pytest>=8.0",
   "ruff>=0.8",
 ]
+otel-demo = [
+  "opentelemetry-sdk>=1.0",
+]
+openai-agents = [
+  "openai-agents>=0.18,<0.19",
+]
 
 [dependency-groups]
 dev = [
@@ -50,12 +56,19 @@ dev = [
 [project.scripts]
 agentlint = "agentlint.cli:main"
 
+[project.entry-points.pytest11]
+agentlint = "agentlint.integrations.pytest_openai"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = [
   "--strict-config",
   "--strict-markers",
+]
+markers = [
+  "live_openai: opt-in tests that may call the OpenAI API",
+  "performance: lightweight performance smoke tests",
 ]
 
 [tool.ruff]

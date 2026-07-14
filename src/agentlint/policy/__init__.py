@@ -1,5 +1,11 @@
 """Policy loading and validation package."""
 
+from agentlint.policy.compile import (
+    CompiledPolicyPlan,
+    CompiledRule,
+    RuleActivationOrigin,
+    compile_policy,
+)
 from agentlint.policy.loaders import (
     PolicyFileError,
     PolicyLoadError,
@@ -13,6 +19,8 @@ from agentlint.policy.models import (
     ApprovalRequirement,
     ArgumentPolicy,
     ArgumentType,
+    CaptureRequirements,
+    EvidenceRequirementLevel,
     ExceptionMatch,
     Policy,
     PolicyException,
@@ -25,6 +33,7 @@ from agentlint.policy.models import (
     SourcePolicy,
     ToolPermission,
     ToolPolicy,
+    ToolResultBoundary,
     ToolRisk,
     TrustLevel,
 )
@@ -34,6 +43,10 @@ __all__ = [
     "ApprovalRequirement",
     "ArgumentPolicy",
     "ArgumentType",
+    "CaptureRequirements",
+    "CompiledPolicyPlan",
+    "CompiledRule",
+    "EvidenceRequirementLevel",
     "ExceptionMatch",
     "Policy",
     "PolicyException",
@@ -44,14 +57,17 @@ __all__ = [
     "PolicySeverity",
     "PolicyYamlError",
     "RuleId",
+    "RuleActivationOrigin",
     "Sensitivity",
     "SinkPolicy",
     "SinkVisibility",
     "SourcePolicy",
     "ToolPermission",
     "ToolPolicy",
+    "ToolResultBoundary",
     "ToolRisk",
     "TrustLevel",
+    "compile_policy",
     "format_policy_validation_error",
     "load_policy",
 ]

@@ -1,0 +1,37 @@
+version: 1
+policy_id: openai_function_tools
+
+capture:
+  require:
+    tool_calls: partial
+    tool_arguments: partial
+
+tools:
+  lookup_account:
+    permission: allowed
+    approval: not_required
+    risk: low
+    arguments:
+      account_id:
+        required: true
+        allowed_types: [string]
+  lookup_status:
+    permission: allowed
+    approval: not_required
+    risk: low
+
+rules:
+  unknown_tool: error
+  denied_tool_call: error
+  disallowed_tool_argument: error
+  missing_approval: "off"
+  approval_after_action: "off"
+  action_after_denial: "off"
+  approval_mismatch: "off"
+  private_to_public_sink: "off"
+  secret_exposure: "off"
+  untrusted_to_privileged_action: "off"
+  sensitive_final_answer: "off"
+  unsupported_claim: "off"
+  invalid_provenance_reference: "off"
+  evidence_after_claim: "off"

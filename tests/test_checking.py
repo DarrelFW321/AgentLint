@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from agentlint.capture import CaptureStatus
 from agentlint.checking import InputErrorKind, TraceCheckStatus, check_trace_file
 from agentlint.diagnostics import DiagnosticCode
 from agentlint.policy import load_policy
@@ -18,6 +19,8 @@ def test_check_trace_file_passes_valid_trace_without_policy() -> None:
     assert result.edges == 5
     assert result.diagnostics == []
     assert result.input_error is None
+    assert result.capture.adapter == "native"
+    assert result.capture.overall_status == CaptureStatus.UNKNOWN
 
 
 def test_check_trace_file_runs_policy_checks() -> None:
@@ -50,6 +53,7 @@ def test_check_trace_file_reports_schema_error_as_invalid_result() -> None:
     assert result.input_error is not None
     assert result.input_error.kind == InputErrorKind.SCHEMA
     assert result.input_error.details
+    assert result.capture.overall_status == CaptureStatus.UNKNOWN
 
 
 def test_check_trace_file_reports_missing_file_as_invalid_result() -> None:

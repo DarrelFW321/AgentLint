@@ -1,0 +1,18 @@
+version: 1
+policy_id: starter_data_flow
+
+tools:
+  customer_db.lookup:
+    result:
+      source: customer_profile
+      sensitivity: private
+      trust: trusted
+  web_search:
+    arguments:
+      query:
+        sink: public_search
+        visibility: public
+
+capture:
+  require:
+    data_flow: partial

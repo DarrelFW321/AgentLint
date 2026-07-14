@@ -1,0 +1,10 @@
+version: 1
+policy_id: starter_tools
+
+tools:
+  lookup_status:
+    permission: allowed
+    arguments:
+      ticket_id:
+        required: true
+        allowed_types: [string]

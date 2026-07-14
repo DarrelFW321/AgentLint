@@ -1,0 +1,102 @@
+{
+  "schema_version": "agentlint.openai_agents.snapshot.v1",
+  "trace_id": "trace_openai_support",
+  "workflow_name": "Support workflow",
+  "group_id": "test_support",
+  "metadata": {},
+  "sdk_version": "0.18.1",
+  "spans": [
+    {
+      "trace_id": "trace_openai_support",
+      "span_id": "span_task",
+      "parent_id": null,
+      "started_at": "2026-07-13T11:59:59Z",
+      "ended_at": "2026-07-13T12:00:05Z",
+      "has_error": false,
+      "span_type": "custom",
+      "span_data": {
+        "name": "task",
+        "data": {}
+      }
+    },
+    {
+      "trace_id": "trace_openai_support",
+      "span_id": "span_agent",
+      "parent_id": "span_task",
+      "started_at": "2026-07-13T12:00:00Z",
+      "ended_at": "2026-07-13T12:00:05Z",
+      "has_error": false,
+      "span_type": "agent",
+      "span_data": {
+        "name": "Support agent"
+      }
+    },
+    {
+      "trace_id": "trace_openai_support",
+      "span_id": "span_turn",
+      "parent_id": "span_agent",
+      "started_at": "2026-07-13T12:00:01Z",
+      "ended_at": "2026-07-13T12:00:04Z",
+      "has_error": false,
+      "span_type": "custom",
+      "span_data": {
+        "name": "turn",
+        "data": {}
+      }
+    },
+    {
+      "trace_id": "trace_openai_support",
+      "span_id": "span_response",
+      "parent_id": "span_turn",
+      "started_at": "2026-07-13T12:00:01Z",
+      "ended_at": "2026-07-13T12:00:02Z",
+      "has_error": false,
+      "span_type": "response",
+      "span_data": {
+        "response_id": "resp_synthetic",
+        "usage": {"input_tokens": 5, "output_tokens": 3}
+      }
+    },
+    {
+      "trace_id": "trace_openai_support",
+      "span_id": "span_function",
+      "parent_id": "span_turn",
+      "started_at": "2026-07-13T12:00:03Z",
+      "ended_at": "2026-07-13T12:00:04Z",
+      "has_error": false,
+      "span_type": "function",
+      "span_data": {
+        "name": "send_email",
+        "input": "{\"recipient\": \"customer@example.test\", \"body\": \"Synthetic update.\"}",
+        "output": "sent"
+      }
+    },
+    {
+      "trace_id": "trace_openai_support",
+      "span_id": "span_guardrail",
+      "parent_id": "span_agent",
+      "started_at": "2026-07-13T12:00:04Z",
+      "ended_at": "2026-07-13T12:00:04Z",
+      "has_error": false,
+      "span_type": "guardrail",
+      "span_data": {
+        "name": "safe_output",
+        "triggered": false
+      }
+    },
+    {
+      "trace_id": "trace_openai_support",
+      "span_id": "span_handoff",
+      "parent_id": "span_agent",
+      "started_at": "2026-07-13T12:00:05Z",
+      "ended_at": "2026-07-13T12:00:05Z",
+      "has_error": false,
+      "span_type": "handoff",
+      "span_data": {
+        "from_agent": "Support agent",
+        "to_agent": "Escalation agent"
+      }
+    }
+  ],
+  "capture_incidents": []
+}

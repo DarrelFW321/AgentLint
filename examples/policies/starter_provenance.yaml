@@ -1,0 +1,12 @@
+version: 1
+policy_id: starter_provenance
+
+rules:
+  unsupported_claim: warning
+  invalid_provenance_reference: error
+  evidence_after_claim: warning
+
+capture:
+  require:
+    provenance: partial
+    final_answers: partial

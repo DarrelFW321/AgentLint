@@ -1,0 +1,13 @@
+version: 1
+policy_id: starter_approval
+
+tools:
+  issue_refund:
+    permission: allowed
+    approval: required
+    risk: high
+
+capture:
+  require:
+    tool_calls: partial
+    approvals: partial

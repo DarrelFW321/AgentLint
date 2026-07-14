@@ -10,6 +10,7 @@ from agentlint.ir.v1.loaders import (
 )
 from agentlint.ir.v1.models import (
     SCHEMA_VERSION,
+    AgentRunEvent,
     ApprovalEvent,
     Claim,
     DeveloperInstructionEvent,
@@ -17,6 +18,8 @@ from agentlint.ir.v1.models import (
     EdgeType,
     Event,
     FinalAnswerEvent,
+    GuardrailEvent,
+    HandoffEvent,
     JsonValue,
     ModelCallEvent,
     ReferenceId,
@@ -30,6 +33,7 @@ from agentlint.ir.v1.models import (
 
 __all__ = [
     "SCHEMA_VERSION",
+    "AgentRunEvent",
     "ApprovalEvent",
     "Claim",
     "DeveloperInstructionEvent",
@@ -37,6 +41,8 @@ __all__ = [
     "EdgeType",
     "Event",
     "FinalAnswerEvent",
+    "GuardrailEvent",
+    "HandoffEvent",
     "JsonValue",
     "ModelCallEvent",
     "ReferenceId",

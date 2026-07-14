@@ -55,7 +55,7 @@ def test_policy_passing_fixtures_have_no_diagnostics(fixture_name: str) -> None:
     ("fixture_name", "expected_code"),
     [
         ("policy_unknown_tool.json", DiagnosticCode.UNKNOWN_TOOL),
-        ("policy_unauthorized_tool_call.json", DiagnosticCode.UNAUTHORIZED_TOOL_CALL),
+        ("policy_denied_tool_call.json", DiagnosticCode.DENIED_TOOL_CALL),
         ("policy_disallowed_tool_argument.json", DiagnosticCode.DISALLOWED_TOOL_ARGUMENT),
         ("policy_missing_approval.json", DiagnosticCode.MISSING_APPROVAL),
         ("policy_approval_after_action.json", DiagnosticCode.APPROVAL_AFTER_ACTION),
@@ -99,6 +99,29 @@ def test_policy_diagnostics_include_severity_reference_and_remediation() -> None
     assert diagnostic.severity == Severity.ERROR
     assert diagnostic.policy_reference == "policy_checks_v1:unknown_tool"
     assert diagnostic.remediation is not None
+
+
+def test_data_flow_diagnostic_includes_only_explicit_sanitized_path() -> None:
+    trace = load_native_trace(TRACE_DIR / "policy_private_to_public_sink.json")
+    diagnostic = evaluate_policy(trace, policy_checks())[0]
+
+    assert diagnostic.path is not None
+    assert [node.event_id for node in diagnostic.path.nodes] == [
+        "evt_customer_profile",
+        "evt_web_search",
+    ]
+    assert [node.label for node in diagnostic.path.nodes] == [
+        "user_message",
+        "tool_call:web_search",
+    ]
+    assert [edge.edge_id for edge in diagnostic.path.edges] == ["edge_data_customer_to_search"]
+
+
+def test_diagnostic_does_not_invent_path_when_trace_has_no_edge() -> None:
+    trace = load_native_trace(TRACE_DIR / "policy_approval_after_action.json")
+    diagnostic = evaluate_policy(trace, policy_checks())[0]
+
+    assert diagnostic.path is None
 
 
 def test_rule_severity_info_is_applied() -> None:

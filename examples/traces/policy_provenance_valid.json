@@ -4,6 +4,21 @@
   "metadata": {
     "scenario": "policy_provenance_valid"
   },
+  "capture": {
+    "schema_version": "agentlint.capture.v1",
+    "adapter": "native_fixture",
+    "capabilities": {
+      "agent_runs": {"status": "captured"},
+      "model_calls": {"status": "captured"},
+      "tool_calls": {"status": "captured"},
+      "tool_arguments": {"status": "captured"},
+      "tool_results": {"status": "captured"},
+      "approvals": {"status": "captured"},
+      "data_flow": {"status": "captured"},
+      "provenance": {"status": "captured"},
+      "final_answers": {"status": "captured"}
+    }
+  },
   "events": [
     {
       "id": "evt_evidence",

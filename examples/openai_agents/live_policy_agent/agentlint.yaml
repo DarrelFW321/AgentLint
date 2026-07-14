@@ -1,0 +1,43 @@
+version: 1
+policy_id: live_openai_customer_support
+
+capture:
+  require:
+    tool_calls: partial
+    tool_arguments: partial
+    approvals: partial
+    final_answers: partial
+
+tools:
+  lookup_status:
+    permission: allowed
+    approval: not_required
+    risk: low
+    arguments:
+      ticket_id:
+        required: true
+        allowed_types: [string]
+  issue_refund:
+    permission: allowed
+    approval: required
+    risk: high
+    arguments:
+      ticket_id:
+        required: true
+        allowed_types: [string]
+
+rules:
+  unknown_tool: error
+  denied_tool_call: error
+  disallowed_tool_argument: error
+  missing_approval: error
+  approval_after_action: error
+  action_after_denial: error
+  approval_mismatch: error
+  private_to_public_sink: "off"
+  secret_exposure: "off"
+  untrusted_to_privileged_action: "off"
+  sensitive_final_answer: "off"
+  unsupported_claim: "off"
+  invalid_provenance_reference: "off"
+  evidence_after_claim: "off"

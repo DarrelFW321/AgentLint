@@ -5,7 +5,14 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 
-from agentlint.diagnostics import Diagnostic, DiagnosticCode, Severity
+from agentlint.diagnostics import (
+    Diagnostic,
+    DiagnosticCode,
+    DiagnosticPath,
+    DiagnosticPathEdge,
+    DiagnosticPathNode,
+    Severity,
+)
 from agentlint.ir.v1 import (
     ApprovalEvent,
     Edge,
@@ -15,24 +22,28 @@ from agentlint.ir.v1 import (
     ToolCallEvent,
     Trace,
 )
+from agentlint.passes.boundaries import apply_policy_boundaries
 from agentlint.policy import (
     ApprovalRequirement,
     ArgumentType,
+    CompiledPolicyPlan,
     Policy,
     PolicyException,
     PolicySeverity,
     RuleId,
     Sensitivity,
+    SinkPolicy,
     SinkVisibility,
     SourcePolicy,
     ToolPermission,
     ToolRisk,
     TrustLevel,
+    compile_policy,
 )
 
 _RULE_TO_CODE = {
     RuleId.UNKNOWN_TOOL: DiagnosticCode.UNKNOWN_TOOL,
-    RuleId.UNAUTHORIZED_TOOL_CALL: DiagnosticCode.UNAUTHORIZED_TOOL_CALL,
+    RuleId.DENIED_TOOL_CALL: DiagnosticCode.DENIED_TOOL_CALL,
     RuleId.DISALLOWED_TOOL_ARGUMENT: DiagnosticCode.DISALLOWED_TOOL_ARGUMENT,
     RuleId.MISSING_APPROVAL: DiagnosticCode.MISSING_APPROVAL,
     RuleId.APPROVAL_AFTER_ACTION: DiagnosticCode.APPROVAL_AFTER_ACTION,
@@ -45,23 +56,6 @@ _RULE_TO_CODE = {
     RuleId.UNSUPPORTED_CLAIM: DiagnosticCode.UNSUPPORTED_CLAIM,
     RuleId.INVALID_PROVENANCE_REFERENCE: DiagnosticCode.INVALID_PROVENANCE_REFERENCE,
     RuleId.EVIDENCE_AFTER_CLAIM: DiagnosticCode.EVIDENCE_AFTER_CLAIM,
-}
-
-_DEFAULT_RULE_SEVERITIES = {
-    RuleId.UNKNOWN_TOOL: PolicySeverity.ERROR,
-    RuleId.UNAUTHORIZED_TOOL_CALL: PolicySeverity.ERROR,
-    RuleId.DISALLOWED_TOOL_ARGUMENT: PolicySeverity.ERROR,
-    RuleId.MISSING_APPROVAL: PolicySeverity.ERROR,
-    RuleId.APPROVAL_AFTER_ACTION: PolicySeverity.ERROR,
-    RuleId.ACTION_AFTER_DENIAL: PolicySeverity.ERROR,
-    RuleId.APPROVAL_MISMATCH: PolicySeverity.ERROR,
-    RuleId.PRIVATE_TO_PUBLIC_SINK: PolicySeverity.ERROR,
-    RuleId.SECRET_EXPOSURE: PolicySeverity.ERROR,
-    RuleId.UNTRUSTED_TO_PRIVILEGED_ACTION: PolicySeverity.ERROR,
-    RuleId.SENSITIVE_FINAL_ANSWER: PolicySeverity.ERROR,
-    RuleId.UNSUPPORTED_CLAIM: PolicySeverity.WARNING,
-    RuleId.INVALID_PROVENANCE_REFERENCE: PolicySeverity.ERROR,
-    RuleId.EVIDENCE_AFTER_CLAIM: PolicySeverity.WARNING,
 }
 
 _POLICY_TO_DIAGNOSTIC_SEVERITY = {
@@ -80,10 +74,23 @@ class _CandidateDiagnostic:
     sink: str | None = None
 
 
-def evaluate_policy(trace: Trace, policy: Policy) -> list[Diagnostic]:
+def evaluate_policy(
+    trace: Trace,
+    policy: Policy,
+    *,
+    plan: CompiledPolicyPlan | None = None,
+) -> list[Diagnostic]:
     """Evaluate a parsed policy against a structurally valid trace."""
+    trace = apply_policy_boundaries(trace, policy)
     events_by_id = {event.id: event for event in trace.events}
-    context = _EvaluationContext(trace=trace, policy=policy, events_by_id=events_by_id)
+    context = _EvaluationContext(
+        trace=trace,
+        policy=policy,
+        plan=plan or compile_policy(policy),
+        source_policies=policy.effective_sources(),
+        sink_policies=policy.effective_sinks(),
+        events_by_id=events_by_id,
+    )
 
     candidates: list[_CandidateDiagnostic] = []
     candidates.extend(_tool_check_candidates(context))
@@ -103,6 +110,9 @@ def evaluate_policy(trace: Trace, policy: Policy) -> list[Diagnostic]:
 class _EvaluationContext:
     trace: Trace
     policy: Policy
+    plan: CompiledPolicyPlan
+    source_policies: dict[str, SourcePolicy]
+    sink_policies: dict[str, SinkPolicy]
     events_by_id: dict[str, Event]
 
 
@@ -116,7 +126,7 @@ def _tool_check_candidates(context: _EvaluationContext) -> list[_CandidateDiagno
         tool_policy = context.policy.tools.get(event.tool_name)
         if tool_policy is None:
             candidate = _candidate(
-                context.policy,
+                context,
                 RuleId.UNKNOWN_TOOL,
                 f'tool call "{event.id}" uses unknown tool "{event.tool_name}"',
                 related_events=[event.id],
@@ -128,12 +138,12 @@ def _tool_check_candidates(context: _EvaluationContext) -> list[_CandidateDiagno
 
         if tool_policy.permission == ToolPermission.DENIED:
             candidate = _candidate(
-                context.policy,
-                RuleId.UNAUTHORIZED_TOOL_CALL,
-                f'tool call "{event.id}" uses denied tool "{event.tool_name}"',
+                context,
+                RuleId.DENIED_TOOL_CALL,
+                f'tool call "{event.id}" uses tool "{event.tool_name}" denied by trace policy',
                 related_events=[event.id],
                 remediation=(
-                    "Do not call denied tools, or update the policy if this tool is allowed."
+                    "Remove the call or update the trace policy when this tool should be permitted."
                 ),
                 tool=event.tool_name,
             )
@@ -147,7 +157,7 @@ def _tool_check_candidates(context: _EvaluationContext) -> list[_CandidateDiagno
             if argument_name not in event.arguments:
                 if argument_policy.required:
                     candidate = _candidate(
-                        context.policy,
+                        context,
                         RuleId.DISALLOWED_TOOL_ARGUMENT,
                         (f'tool call "{event.id}" is missing required argument "{argument_name}"'),
                         related_events=[event.id],
@@ -166,7 +176,7 @@ def _tool_check_candidates(context: _EvaluationContext) -> list[_CandidateDiagno
                     argument_type.value for argument_type in argument_policy.allowed_types
                 )
                 candidate = _candidate(
-                    context.policy,
+                    context,
                     RuleId.DISALLOWED_TOOL_ARGUMENT,
                     (
                         f'tool call "{event.id}" argument "{argument_name}" has disallowed '
@@ -184,7 +194,7 @@ def _tool_check_candidates(context: _EvaluationContext) -> list[_CandidateDiagno
                 and argument_value not in argument_policy.allowed_values
             ):
                 candidate = _candidate(
-                    context.policy,
+                    context,
                     RuleId.DISALLOWED_TOOL_ARGUMENT,
                     (
                         f'tool call "{event.id}" argument "{argument_name}" has a value '
@@ -216,7 +226,7 @@ def _approval_mismatch_candidates(context: _EvaluationContext) -> list[_Candidat
                     continue
 
                 candidate = _candidate(
-                    context.policy,
+                    context,
                     RuleId.APPROVAL_MISMATCH,
                     (
                         f'approval event "{event.id}" references subject "{subject_target}" '
@@ -234,7 +244,7 @@ def _approval_mismatch_candidates(context: _EvaluationContext) -> list[_Candidat
                 continue
 
             candidate = _candidate(
-                context.policy,
+                context,
                 RuleId.APPROVAL_MISMATCH,
                 f'approval event "{event.id}" targets non-tool-call event "{target_id}"',
                 related_events=[event.id, target_id],
@@ -270,7 +280,7 @@ def _required_approval_candidates(context: _EvaluationContext) -> list[_Candidat
         if prior_denials:
             denial = prior_denials[0]
             candidate = _candidate(
-                context.policy,
+                context,
                 RuleId.ACTION_AFTER_DENIAL,
                 (
                     f'tool call "{event.id}" ran after approval event "{denial.id}" '
@@ -299,7 +309,7 @@ def _required_approval_candidates(context: _EvaluationContext) -> list[_Candidat
         if late_approvals:
             approval = late_approvals[0]
             candidate = _candidate(
-                context.policy,
+                context,
                 RuleId.APPROVAL_AFTER_ACTION,
                 (
                     f'tool call "{event.id}" executed before approval event '
@@ -313,7 +323,7 @@ def _required_approval_candidates(context: _EvaluationContext) -> list[_Candidat
             continue
 
         candidate = _candidate(
-            context.policy,
+            context,
             RuleId.MISSING_APPROVAL,
             f'tool call "{event.id}" requires prior approval for tool "{event.tool_name}"',
             related_events=[event.id],
@@ -349,7 +359,7 @@ def _sink_exposure_candidates(
     candidates: list[_CandidateDiagnostic] = []
 
     for sink_label in _sink_labels(event):
-        sink_policy = context.policy.sinks.get(sink_label)
+        sink_policy = context.sink_policies.get(sink_label)
         if sink_policy is None:
             continue
 
@@ -360,7 +370,7 @@ def _sink_exposure_candidates(
                 SinkVisibility.PRIVATE,
             }:
                 candidate = _candidate(
-                    context.policy,
+                    context,
                     RuleId.SECRET_EXPOSURE,
                     (
                         f'secret source "{source.label}" reaches sink "{sink_label}" '
@@ -380,7 +390,7 @@ def _sink_exposure_candidates(
                 and sink_policy.visibility == SinkVisibility.PUBLIC
             ):
                 candidate = _candidate(
-                    context.policy,
+                    context,
                     RuleId.PRIVATE_TO_PUBLIC_SINK,
                     (
                         f'private source "{source.label}" reaches public sink "{sink_label}" '
@@ -423,7 +433,7 @@ def _untrusted_privileged_action_candidates(
             continue
 
         candidate = _candidate(
-            context.policy,
+            context,
             RuleId.UNTRUSTED_TO_PRIVILEGED_ACTION,
             (f'untrusted source "{source.label}" influences privileged tool call "{event.id}"'),
             related_events=[source.event.id, event.id],
@@ -450,7 +460,7 @@ def _sensitive_final_answer_candidates(
             continue
 
         candidate = _candidate(
-            context.policy,
+            context,
             RuleId.SENSITIVE_FINAL_ANSWER,
             f'sensitive source "{source.label}" reaches final answer "{event.id}"',
             related_events=[source.event.id, event.id],
@@ -478,7 +488,7 @@ def _provenance_candidates(context: _EvaluationContext) -> list[_CandidateDiagno
         for claim in event.claims:
             if not claim.evidence:
                 candidate = _candidate(
-                    context.policy,
+                    context,
                     RuleId.UNSUPPORTED_CLAIM,
                     f'claim "{claim.id}" in final answer "{event.id}" has no evidence',
                     related_events=[event.id],
@@ -494,7 +504,7 @@ def _provenance_candidates(context: _EvaluationContext) -> list[_CandidateDiagno
 
                 if (evidence_id, event.id) not in provenance_pairs:
                     candidate = _candidate(
-                        context.policy,
+                        context,
                         RuleId.INVALID_PROVENANCE_REFERENCE,
                         (
                             f'claim "{claim.id}" evidence "{evidence_id}" has no provenance '
@@ -509,7 +519,7 @@ def _provenance_candidates(context: _EvaluationContext) -> list[_CandidateDiagno
 
                 if evidence_event.sequence > event.sequence:
                     candidate = _candidate(
-                        context.policy,
+                        context,
                         RuleId.EVIDENCE_AFTER_CLAIM,
                         (
                             f'claim "{claim.id}" uses evidence "{evidence_id}" that occurs '
@@ -544,7 +554,7 @@ def _upstream_source_contexts(
             continue
 
         for source_label in _source_labels(event):
-            source_policy = context.policy.sources.get(source_label)
+            source_policy = context.source_policies.get(source_label)
             if source_policy is None:
                 continue
 
@@ -554,7 +564,7 @@ def _upstream_source_contexts(
 
 
 def _candidate(
-    policy: Policy,
+    context: _EvaluationContext,
     rule_id: RuleId,
     message: str,
     *,
@@ -565,7 +575,7 @@ def _candidate(
     source: str | None = None,
     sink: str | None = None,
 ) -> _CandidateDiagnostic | None:
-    severity = _severity_for_rule(policy, rule_id)
+    severity = _severity_for_rule(context.plan, rule_id)
     if severity is None:
         return None
 
@@ -577,13 +587,61 @@ def _candidate(
             message=message,
             related_events=related_events,
             related_edges=related_edges or [],
-            policy_reference=f"{policy.policy_id}:{rule_id.value}",
+            path=_diagnostic_path(context, related_events),
+            policy_reference=f"{context.policy.policy_id}:{rule_id.value}",
             remediation=remediation,
         ),
         tool=tool,
         source=source,
         sink=sink,
     )
+
+
+def _diagnostic_path(
+    context: _EvaluationContext,
+    related_events: list[str],
+) -> DiagnosticPath | None:
+    if len(related_events) < 2:
+        return None
+    starts = [(related_events[0], related_events[-1]), (related_events[-1], related_events[0])]
+    outgoing: dict[str, list[Edge]] = defaultdict(list)
+    for edge in context.trace.edges:
+        outgoing[edge.from_event].append(edge)
+    for edges in outgoing.values():
+        edges.sort(key=lambda edge: (edge.type, edge.id, edge.to_event))
+
+    for start, target in starts:
+        queue: list[tuple[str, list[Edge]]] = [(start, [])]
+        visited = {start}
+        while queue:
+            event_id, path_edges = queue.pop(0)
+            if event_id == target and path_edges:
+                event_ids = [start, *(edge.to_event for edge in path_edges)]
+                return DiagnosticPath(
+                    nodes=[
+                        DiagnosticPathNode(
+                            event_id=item,
+                            label=_safe_event_label(context.events_by_id[item]),
+                        )
+                        for item in event_ids
+                    ],
+                    edges=[
+                        DiagnosticPathEdge(edge_id=edge.id, edge_type=edge.type)
+                        for edge in path_edges
+                    ],
+                )
+            for edge in outgoing[event_id]:
+                if edge.to_event in visited:
+                    continue
+                visited.add(edge.to_event)
+                queue.append((edge.to_event, [*path_edges, edge]))
+    return None
+
+
+def _safe_event_label(event: Event) -> str:
+    if isinstance(event, ToolCallEvent):
+        return f"tool_call:{event.tool_name}"
+    return event.type
 
 
 def _append_if_enabled(
@@ -594,11 +652,11 @@ def _append_if_enabled(
         candidates.append(candidate)
 
 
-def _severity_for_rule(policy: Policy, rule_id: RuleId) -> Severity | None:
-    policy_severity = policy.rules.get(rule_id, _DEFAULT_RULE_SEVERITIES[rule_id])
-    if policy_severity == PolicySeverity.OFF:
+def _severity_for_rule(plan: CompiledPolicyPlan, rule_id: RuleId) -> Severity | None:
+    rule = plan.rule(rule_id)
+    if rule is None:
         return None
-    return _POLICY_TO_DIAGNOSTIC_SEVERITY[policy_severity]
+    return _POLICY_TO_DIAGNOSTIC_SEVERITY[rule.severity]
 
 
 def _is_suppressed_by_exception(policy: Policy, candidate: _CandidateDiagnostic) -> bool:

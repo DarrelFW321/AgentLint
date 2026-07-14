@@ -1,0 +1,57 @@
+{
+  "resourceSpans": [
+    {
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "44444444444444444444444444444444",
+              "spanId": "0000000000000001",
+              "name": "final answer",
+              "startTimeUnixNano": "100",
+              "endTimeUnixNano": "200",
+              "attributes": [
+                {
+                  "key": "agentlint.trace.id",
+                  "value": {
+                    "stringValue": "otel_unsupported_claim"
+                  }
+                },
+                {
+                  "key": "agentlint.event.type",
+                  "value": {
+                    "stringValue": "final_answer"
+                  }
+                },
+                {
+                  "key": "agentlint.event.id",
+                  "value": {
+                    "stringValue": "evt_final"
+                  }
+                },
+                {
+                  "key": "agentlint.sequence",
+                  "value": {
+                    "intValue": "0"
+                  }
+                },
+                {
+                  "key": "agentlint.content",
+                  "value": {
+                    "stringValue": "The account is active."
+                  }
+                },
+                {
+                  "key": "agentlint.claims_json",
+                  "value": {
+                    "stringValue": "[{\"id\":\"claim_status\",\"text\":\"The account is active.\",\"evidence\":[]}]"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

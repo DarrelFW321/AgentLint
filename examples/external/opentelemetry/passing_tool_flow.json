@@ -1,0 +1,115 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": []
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "agentlint.demo"
+          },
+          "spans": [
+            {
+              "traceId": "11111111111111111111111111111111",
+              "spanId": "0000000000000001",
+              "name": "tool.call lookup_account",
+              "startTimeUnixNano": "100",
+              "endTimeUnixNano": "200",
+              "attributes": [
+                {
+                  "key": "agentlint.trace.id",
+                  "value": {
+                    "stringValue": "otel_passing_tool_flow"
+                  }
+                },
+                {
+                  "key": "agentlint.event.type",
+                  "value": {
+                    "stringValue": "tool_call"
+                  }
+                },
+                {
+                  "key": "agentlint.event.id",
+                  "value": {
+                    "stringValue": "evt_lookup_account"
+                  }
+                },
+                {
+                  "key": "agentlint.sequence",
+                  "value": {
+                    "intValue": "0"
+                  }
+                },
+                {
+                  "key": "agentlint.tool.name",
+                  "value": {
+                    "stringValue": "lookup_account"
+                  }
+                },
+                {
+                  "key": "agentlint.tool.arguments_json",
+                  "value": {
+                    "stringValue": "{\"account_id\":\"acct_123\"}"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "11111111111111111111111111111111",
+              "spanId": "0000000000000002",
+              "parentSpanId": "0000000000000001",
+              "name": "tool.result lookup_account",
+              "startTimeUnixNano": "300",
+              "endTimeUnixNano": "400",
+              "attributes": [
+                {
+                  "key": "agentlint.trace.id",
+                  "value": {
+                    "stringValue": "otel_passing_tool_flow"
+                  }
+                },
+                {
+                  "key": "agentlint.event.type",
+                  "value": {
+                    "stringValue": "tool_result"
+                  }
+                },
+                {
+                  "key": "agentlint.event.id",
+                  "value": {
+                    "stringValue": "evt_lookup_result"
+                  }
+                },
+                {
+                  "key": "agentlint.sequence",
+                  "value": {
+                    "intValue": "1"
+                  }
+                },
+                {
+                  "key": "agentlint.tool.name",
+                  "value": {
+                    "stringValue": "lookup_account"
+                  }
+                },
+                {
+                  "key": "agentlint.tool.call_id",
+                  "value": {
+                    "stringValue": "evt_lookup_account"
+                  }
+                },
+                {
+                  "key": "agentlint.tool.result_json",
+                  "value": {
+                    "stringValue": "{\"status\":\"active\"}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

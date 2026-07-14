@@ -1,0 +1,126 @@
+{
+  "resourceSpans": [
+    {
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "33333333333333333333333333333333",
+              "spanId": "0000000000000001",
+              "name": "user message customer profile",
+              "startTimeUnixNano": "100",
+              "endTimeUnixNano": "200",
+              "attributes": [
+                {
+                  "key": "agentlint.trace.id",
+                  "value": {
+                    "stringValue": "otel_private_to_public_sink"
+                  }
+                },
+                {
+                  "key": "agentlint.event.type",
+                  "value": {
+                    "stringValue": "user_message"
+                  }
+                },
+                {
+                  "key": "agentlint.event.id",
+                  "value": {
+                    "stringValue": "evt_customer_profile"
+                  }
+                },
+                {
+                  "key": "agentlint.sequence",
+                  "value": {
+                    "intValue": "0"
+                  }
+                },
+                {
+                  "key": "agentlint.content",
+                  "value": {
+                    "stringValue": "Customer profile details."
+                  }
+                },
+                {
+                  "key": "agentlint.sources",
+                  "value": {
+                    "arrayValue": {
+                      "values": [
+                        {
+                          "stringValue": "customer_profile"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "agentlint.data_flow.to",
+                  "value": {
+                    "stringValue": "evt_web_search"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "33333333333333333333333333333333",
+              "spanId": "0000000000000002",
+              "name": "tool.call web_search",
+              "startTimeUnixNano": "300",
+              "endTimeUnixNano": "400",
+              "attributes": [
+                {
+                  "key": "agentlint.trace.id",
+                  "value": {
+                    "stringValue": "otel_private_to_public_sink"
+                  }
+                },
+                {
+                  "key": "agentlint.event.type",
+                  "value": {
+                    "stringValue": "tool_call"
+                  }
+                },
+                {
+                  "key": "agentlint.event.id",
+                  "value": {
+                    "stringValue": "evt_web_search"
+                  }
+                },
+                {
+                  "key": "agentlint.sequence",
+                  "value": {
+                    "intValue": "1"
+                  }
+                },
+                {
+                  "key": "agentlint.tool.name",
+                  "value": {
+                    "stringValue": "web_search"
+                  }
+                },
+                {
+                  "key": "agentlint.tool.arguments_json",
+                  "value": {
+                    "stringValue": "{\"query\":\"customer profile details\"}"
+                  }
+                },
+                {
+                  "key": "agentlint.sinks",
+                  "value": {
+                    "arrayValue": {
+                      "values": [
+                        {
+                          "stringValue": "web_search.query"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

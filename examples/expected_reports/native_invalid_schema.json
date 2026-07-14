@@ -1,0 +1,98 @@
+{
+  "schema_version": "agentlint.report.v4",
+  "agentlint_version": "0.0.0",
+  "summary": {
+    "trace_count": 1,
+    "passed": 0,
+    "failed": 0,
+    "not_verifiable": 0,
+    "invalid": 1,
+    "diagnostics": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    },
+    "capture": {
+      "captured": 0,
+      "partial": 0,
+      "unavailable": 0,
+      "unknown": 1
+    },
+    "fail_on": "never",
+    "failed_threshold": false,
+    "unmet_evidence": {}
+  },
+  "runs": [
+    {
+      "trace_path": "examples\\traces\\native_invalid_schema.json",
+      "trace_id": null,
+      "policy_id": null,
+      "status": "invalid",
+      "events": 0,
+      "edges": 0,
+      "capture": {
+        "schema_version": "agentlint.capture.v1",
+        "adapter": "unknown",
+        "adapter_version": null,
+        "framework": null,
+        "framework_version": null,
+        "capabilities": {
+          "agent_runs": {
+            "status": "unknown",
+            "reason": "Capture completeness is unknown because the trace could not be loaded."
+          },
+          "model_calls": {
+            "status": "unknown",
+            "reason": "Capture completeness is unknown because the trace could not be loaded."
+          },
+          "tool_calls": {
+            "status": "unknown",
+            "reason": "Capture completeness is unknown because the trace could not be loaded."
+          },
+          "tool_arguments": {
+            "status": "unknown",
+            "reason": "Capture completeness is unknown because the trace could not be loaded."
+          },
+          "tool_results": {
+            "status": "unknown",
+            "reason": "Capture completeness is unknown because the trace could not be loaded."
+          },
+          "approvals": {
+            "status": "unknown",
+            "reason": "Capture completeness is unknown because the trace could not be loaded."
+          },
+          "data_flow": {
+            "status": "unknown",
+            "reason": "Capture completeness is unknown because the trace could not be loaded."
+          },
+          "provenance": {
+            "status": "unknown",
+            "reason": "Capture completeness is unknown because the trace could not be loaded."
+          },
+          "final_answers": {
+            "status": "unknown",
+            "reason": "Capture completeness is unknown because the trace could not be loaded."
+          }
+        },
+        "notes": []
+      },
+      "evidence": {
+        "requirements": [],
+        "unmet": []
+      },
+      "diagnostics": [],
+      "input_error": {
+        "kind": "schema",
+        "message": "trace schema validation failed",
+        "details": [
+          "events[0].user_message.sequence: Input should be a valid integer [int_type]",
+          "events[0].user_message.content: Field required [missing]"
+        ]
+      }
+    }
+  ],
+  "redaction": {
+    "mode": "metadata_only",
+    "raw_values_included": false
+  }
+}

@@ -10,7 +10,7 @@ from agentlint.checking import TraceCheckResult, TraceCheckStatus
 from agentlint.diagnostics import Severity
 from agentlint.version import __version__
 
-REPORT_SCHEMA_VERSION = "agentlint.report.v1"
+REPORT_SCHEMA_VERSION = "agentlint.report.v4"
 
 
 class FailOn(StrEnum):
@@ -39,6 +39,17 @@ class SeverityCounts(BaseModel):
     info: int = Field(default=0, ge=0)
 
 
+class CaptureStatusCounts(BaseModel):
+    """Trace counts by overall capture status."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    captured: int = Field(default=0, ge=0)
+    partial: int = Field(default=0, ge=0)
+    unavailable: int = Field(default=0, ge=0)
+    unknown: int = Field(default=0, ge=0)
+
+
 class ReportSummary(BaseModel):
     """Summary for an AgentLint report."""
 
@@ -47,10 +58,13 @@ class ReportSummary(BaseModel):
     trace_count: int = Field(ge=0)
     passed: int = Field(ge=0)
     failed: int = Field(ge=0)
+    not_verifiable: int = Field(ge=0)
     invalid: int = Field(ge=0)
     diagnostics: SeverityCounts
+    capture: CaptureStatusCounts
     fail_on: FailOn
     failed_threshold: bool
+    unmet_evidence: dict[str, int] = Field(default_factory=dict)
 
 
 class RedactionInfo(BaseModel):
@@ -84,10 +98,15 @@ def build_report(
         trace_count=len(results),
         passed=sum(1 for result in results if result.status == TraceCheckStatus.PASSED),
         failed=sum(1 for result in results if result.status == TraceCheckStatus.FAILED),
+        not_verifiable=sum(
+            1 for result in results if result.status == TraceCheckStatus.NOT_VERIFIABLE
+        ),
         invalid=sum(1 for result in results if result.status == TraceCheckStatus.INVALID),
         diagnostics=diagnostics,
+        capture=_capture_status_counts(results),
         fail_on=fail_on,
         failed_threshold=threshold_failed(diagnostics, fail_on),
+        unmet_evidence=_unmet_evidence_counts(results),
     )
 
     return AgentLintReport(summary=summary, runs=results)
@@ -95,7 +114,11 @@ def build_report(
 
 def report_should_fail(report: AgentLintReport) -> bool:
     """Return whether a report should produce a non-zero process exit."""
-    return report.summary.invalid > 0 or report.summary.failed_threshold
+    return (
+        report.summary.invalid > 0
+        or report.summary.not_verifiable > 0
+        or report.summary.failed_threshold
+    )
 
 
 def threshold_failed(counts: SeverityCounts, fail_on: FailOn) -> bool:
@@ -125,3 +148,23 @@ def _severity_counts(results: list[TraceCheckResult]) -> SeverityCounts:
                     counts.info += 1
 
     return counts
+
+
+def _capture_status_counts(results: list[TraceCheckResult]) -> CaptureStatusCounts:
+    counts = CaptureStatusCounts()
+    for result in results:
+        setattr(
+            counts,
+            result.capture.overall_status.value,
+            getattr(counts, result.capture.overall_status.value) + 1,
+        )
+    return counts
+
+
+def _unmet_evidence_counts(results: list[TraceCheckResult]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for result in results:
+        for requirement in result.evidence.unmet:
+            key = requirement.capability.value
+            counts[key] = counts.get(key, 0) + 1
+    return dict(sorted(counts.items()))

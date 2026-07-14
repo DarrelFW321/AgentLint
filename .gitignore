@@ -4,6 +4,7 @@ __pycache__/
 *.pyo
 .pytest_cache/
 .ruff_cache/
+.agentlint/
 
 # Virtual environments
 .venv/
@@ -12,3 +13,18 @@ __pycache__/
 build/
 dist/
 *.egg-info/
+
+# Local OpenTelemetry demo outputs
+examples/external/opentelemetry/sdk_demo_missing_approval.json
+examples/external/opentelemetry/local_agent_demo.json
+examples/external/opentelemetry/support_agent_demo.json
+examples/generated/otel_sdk_demo_missing_approval.agentlint.json
+examples/generated/local_agent_demo.agentlint.json
+examples/generated/support_agent_demo.agentlint.json
+
+# Run-specific OpenAI Agents capture outputs
+examples/external/openai_agents/sdk_demo_capture/
+examples/external/openai_agents/live_demo_capture/
+examples/generated/openai_sdk_demo.agentlint.json
+examples/generated/openai_live_demo.agentlint.json
+examples/openai_agents/live_policy_agent/generated/

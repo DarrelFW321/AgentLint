@@ -24,6 +24,7 @@ def test_diagnostic_defaults_and_json_serialization() -> None:
         "message": 'duplicate event id "evt_1"',
         "related_events": [],
         "related_edges": [],
+        "path": None,
         "policy_reference": None,
         "remediation": None,
     }
@@ -68,7 +69,7 @@ def test_format_diagnostics_joins_multiple_diagnostics() -> None:
 def test_diagnostic_code_contains_milestone_4_policy_codes() -> None:
     policy_codes = {
         DiagnosticCode.UNKNOWN_TOOL,
-        DiagnosticCode.UNAUTHORIZED_TOOL_CALL,
+        DiagnosticCode.DENIED_TOOL_CALL,
         DiagnosticCode.DISALLOWED_TOOL_ARGUMENT,
         DiagnosticCode.MISSING_APPROVAL,
         DiagnosticCode.APPROVAL_AFTER_ACTION,
@@ -98,6 +99,14 @@ def test_explain_diagnostic_code_is_case_insensitive() -> None:
     assert explanation is not None
     assert explanation.code == DiagnosticCode.UNKNOWN_TOOL
     assert explanation.category == "policy"
+
+
+def test_legacy_unauthorized_name_resolves_to_denied_tool_explanation() -> None:
+    explanation = explain_diagnostic_code("UNAUTHORIZED_TOOL_CALL")
+
+    assert explanation is not None
+    assert explanation.code == DiagnosticCode.DENIED_TOOL_CALL
+    assert DiagnosticCode.UNAUTHORIZED_TOOL_CALL is DiagnosticCode.DENIED_TOOL_CALL
 
 
 def test_explain_diagnostic_code_returns_none_for_unknown_code() -> None:

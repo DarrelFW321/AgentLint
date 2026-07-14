@@ -1,0 +1,356 @@
+{
+  "schema_version": "agentlint.report.v4",
+  "agentlint_version": "0.0.0",
+  "summary": {
+    "trace_count": 2,
+    "passed": 0,
+    "failed": 2,
+    "not_verifiable": 0,
+    "invalid": 0,
+    "diagnostics": {
+      "error": 2,
+      "warning": 0,
+      "info": 0
+    },
+    "capture": {
+      "captured": 0,
+      "partial": 0,
+      "unavailable": 0,
+      "unknown": 2
+    },
+    "fail_on": "never",
+    "failed_threshold": false,
+    "unmet_evidence": {
+      "approvals": 2,
+      "data_flow": 2,
+      "final_answers": 2,
+      "provenance": 2,
+      "tool_arguments": 2,
+      "tool_calls": 2
+    }
+  },
+  "runs": [
+    {
+      "trace_path": "examples\\traces\\policy_unknown_tool.json",
+      "trace_id": "trace_policy_unknown_tool",
+      "policy_id": "policy_checks_v1",
+      "status": "failed",
+      "events": 1,
+      "edges": 0,
+      "capture": {
+        "schema_version": "agentlint.capture.v1",
+        "adapter": "native",
+        "adapter_version": null,
+        "framework": null,
+        "framework_version": null,
+        "capabilities": {
+          "agent_runs": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "model_calls": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "tool_calls": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "tool_arguments": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "tool_results": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "approvals": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "data_flow": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "provenance": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "final_answers": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          }
+        },
+        "notes": []
+      },
+      "evidence": {
+        "requirements": [
+          {
+            "capability": "tool_calls",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "tool_arguments",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "approvals",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "data_flow",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "provenance",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "final_answers",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          }
+        ],
+        "unmet": [
+          {
+            "capability": "tool_calls",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "tool_arguments",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "approvals",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "data_flow",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "provenance",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "final_answers",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          }
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "UNKNOWN_TOOL",
+          "severity": "error",
+          "message": "tool call \"evt_unknown_tool\" uses unknown tool \"unknown_tool\"",
+          "related_events": [
+            "evt_unknown_tool"
+          ],
+          "related_edges": [],
+          "path": null,
+          "policy_reference": "policy_checks_v1:unknown_tool",
+          "remediation": "Add the tool to the policy or remove the tool call from the trace."
+        }
+      ],
+      "input_error": null
+    },
+    {
+      "trace_path": "examples\\traces\\policy_missing_approval.json",
+      "trace_id": "trace_policy_missing_approval",
+      "policy_id": "policy_checks_v1",
+      "status": "failed",
+      "events": 1,
+      "edges": 0,
+      "capture": {
+        "schema_version": "agentlint.capture.v1",
+        "adapter": "native",
+        "adapter_version": null,
+        "framework": null,
+        "framework_version": null,
+        "capabilities": {
+          "agent_runs": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "model_calls": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "tool_calls": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "tool_arguments": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "tool_results": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "approvals": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "data_flow": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "provenance": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          },
+          "final_answers": {
+            "status": "unknown",
+            "reason": "No capture declaration was provided."
+          }
+        },
+        "notes": []
+      },
+      "evidence": {
+        "requirements": [
+          {
+            "capability": "tool_calls",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "tool_arguments",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "approvals",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "data_flow",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "provenance",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "final_answers",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          }
+        ],
+        "unmet": [
+          {
+            "capability": "tool_calls",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "tool_arguments",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "approvals",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "data_flow",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "provenance",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          },
+          {
+            "capability": "final_answers",
+            "required": "partial",
+            "observed": "unknown",
+            "origin": "inferred",
+            "reason": "No capture declaration was provided."
+          }
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "MISSING_APPROVAL",
+          "severity": "error",
+          "message": "tool call \"evt_send_email\" requires prior approval for tool \"send_email\"",
+          "related_events": [
+            "evt_send_email"
+          ],
+          "related_edges": [],
+          "path": null,
+          "policy_reference": "policy_checks_v1:missing_approval",
+          "remediation": "Add a prior approved approval event for this tool call."
+        }
+      ],
+      "input_error": null
+    }
+  ],
+  "redaction": {
+    "mode": "metadata_only",
+    "raw_values_included": false
+  }
+}

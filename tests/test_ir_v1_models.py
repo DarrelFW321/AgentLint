@@ -32,6 +32,26 @@ def make_trace(events: list[dict], edges: list[dict] | None = None) -> Trace:
             "content": "Use approved tools only.",
         },
         {
+            "id": "evt_agent",
+            "type": "agent_run",
+            "sequence": 0,
+            "agent_name": "Support agent",
+        },
+        {
+            "id": "evt_handoff",
+            "type": "handoff",
+            "sequence": 0,
+            "from_agent": "Support agent",
+            "to_agent": "Escalation agent",
+        },
+        {
+            "id": "evt_guardrail",
+            "type": "guardrail",
+            "sequence": 0,
+            "guardrail_name": "safe_output",
+            "triggered": False,
+        },
+        {
             "id": "evt_model",
             "type": "model_call",
             "sequence": 0,
