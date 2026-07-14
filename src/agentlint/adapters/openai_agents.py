@@ -454,7 +454,7 @@ def _capture_profile(
         "model_calls": CapabilityCoverage(status=status.CAPTURED),
         "tool_calls": CapabilityCoverage(
             status=status.PARTIAL,
-            reason="Function tools are captured; other tool families are not complete in M9.",
+            reason="Function tools are captured; other tool families may not be represented.",
         ),
         "tool_arguments": CapabilityCoverage(
             status=status.PARTIAL,

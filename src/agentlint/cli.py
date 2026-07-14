@@ -14,6 +14,7 @@ from agentlint.adapters.openai_snapshot import OpenAISnapshotError
 from agentlint.adapters.opentelemetry import OpenTelemetryImportError, import_opentelemetry_file
 from agentlint.checking import check_trace_file
 from agentlint.diagnostics import Severity, explain_diagnostic_code, format_diagnostics
+from agentlint.integrations.pytest_runs import check_run
 from agentlint.ir.v1 import (
     TraceFileError,
     TraceJsonError,
@@ -112,6 +113,36 @@ def check(
     else:
         typer.echo(render_text_report(report))
 
+    if report_should_fail(report):
+        raise typer.Exit(1)
+
+
+@app.command("check-run")
+def check_pytest_run(
+    run_path: Annotated[
+        Path,
+        typer.Argument(help="Captured pytest run directory, manifest, or latest pointer."),
+    ],
+    report_format: Annotated[
+        ReportFormat,
+        typer.Option("--format", help="Report output format."),
+    ] = ReportFormat.TEXT,
+    fail_on: Annotated[
+        FailOn,
+        typer.Option("--fail-on", help="Diagnostic severity threshold for exit code."),
+    ] = FailOn.ERROR,
+) -> None:
+    """Recheck a captured pytest run with its recorded policy assignments."""
+    try:
+        report = check_run(run_path, fail_on=fail_on)
+    except Exception as exc:
+        typer.echo(f"error: could not check pytest run: {exc}", err=True)
+        raise typer.Exit(1) from exc
+
+    if report_format == ReportFormat.JSON:
+        typer.echo(render_json_report(report))
+    else:
+        typer.echo(render_text_report(report))
     if report_should_fail(report):
         raise typer.Exit(1)
 

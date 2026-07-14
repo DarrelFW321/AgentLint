@@ -225,7 +225,7 @@ class Policy(StrictPolicyModel):
     @model_validator(mode="before")
     @classmethod
     def migrate_legacy_rule_language(cls, value: object) -> object:
-        """Accept the pre-M11 authorization term while normalizing it away."""
+        """Accept the legacy authorization term while normalizing it away."""
         if not isinstance(value, dict):
             return value
         migrated = dict(value)

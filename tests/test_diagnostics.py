@@ -66,7 +66,7 @@ def test_format_diagnostics_joins_multiple_diagnostics() -> None:
     )
 
 
-def test_diagnostic_code_contains_milestone_4_policy_codes() -> None:
+def test_diagnostic_code_contains_policy_codes() -> None:
     policy_codes = {
         DiagnosticCode.UNKNOWN_TOOL,
         DiagnosticCode.DENIED_TOOL_CALL,

@@ -16,8 +16,8 @@ claims.
 
 ### OpenAI Agents SDK
 
-The pytest integration captures existing tests without code changes. The quick start
-below shows the complete command.
+The pytest integration captures agent runs executed by existing tests without code
+changes. The quick start below shows the complete command.
 
 For scripts or another test runner, add capture once at process startup:
 
@@ -85,6 +85,28 @@ pytest --agentlint --agentlint-policy agentlint.yaml
 
 AgentLint captures supported agent runs, evaluates the policy, prints diagnostics, and
 returns a nonzero exit code for policy violations or incomplete traces.
+
+Each run is saved under `.agentlint/runs/` with its traces, selected policies, and a
+manifest. Recheck the latest run without rerunning pytest:
+
+```bash
+agentlint check-run .agentlint/runs/latest.json
+```
+
+Pytest receives test paths, not trace JSON paths. The integration creates the trace
+files while those tests run.
+
+`--agentlint-policy` sets the default policy. Tests that need another policy can select
+one directly:
+
+```python
+@pytest.mark.agentlint(policy="policies/refunds.yaml")
+def test_refund_agent():
+    ...
+```
+
+For larger suites, route test paths to policies in `agentlint.pytest.yaml`. See
+[policy selection](Documents/user-guide.md#policy-selection).
 
 ## Sample output
 

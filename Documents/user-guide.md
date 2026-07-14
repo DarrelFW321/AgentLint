@@ -29,12 +29,108 @@ The plugin:
 
 1. activates local capture for the test session;
 2. associates captured traces with pytest tests;
-3. evaluates each trace against the selected policy;
-4. prints AgentLint diagnostics in the pytest summary; and
-5. fails for violations, invalid traces, missing capture, or unverifiable results.
+3. selects a policy for each test;
+4. writes a run manifest with the traces and policies;
+5. checks the saved run with the standard AgentLint engine; and
+6. prints the report in the pytest summary.
 
 Capture is activated only when `--agentlint` is present. Captured test traces stay
 local.
+
+Specify pytest test paths as usual:
+
+```bash
+pytest tests/test_refunds.py --agentlint --agentlint-policy policies/refunds.yaml
+```
+
+Trace JSON paths are not passed to pytest. The integration creates them from agent
+runs executed by the selected tests.
+
+### Run artifacts
+
+Every pytest run creates a separate directory:
+
+```text
+.agentlint/runs/
+  latest.json
+  <run-id>/
+    manifest.json
+    traces/
+      <trace-id>.openai-agents.json
+    policies/
+      <policy-id>-<hash>.yaml
+```
+
+The manifest records the pytest node ID, captured trace, and selected policy for each
+agent run. Policies are copied into the run directory so the run can be checked later
+with the same policy version.
+
+Recheck the latest run:
+
+```bash
+agentlint check-run .agentlint/runs/latest.json
+```
+
+Or check a specific run:
+
+```bash
+agentlint check-run .agentlint/runs/<run-id>/manifest.json
+```
+
+Use `--format json` for machine-readable output and `--fail-on` to change the severity
+threshold.
+
+### Policy selection
+
+`--agentlint-policy` provides one default policy:
+
+```bash
+pytest --agentlint --agentlint-policy policies/default.yaml
+```
+
+Select a policy for one test with a marker:
+
+```python
+import pytest
+
+@pytest.mark.agentlint(policy="policies/refunds.yaml")
+def test_refund_agent():
+    ...
+```
+
+For a larger suite, create `agentlint.pytest.yaml` in the pytest root:
+
+```yaml
+version: 1
+default_policy: policies/default.yaml
+
+routes:
+  - tests: tests/refunds/**
+    policy: policies/refunds.yaml
+
+  - tests:
+      - tests/research/**
+      - tests/browser/**
+    policy: policies/research.yaml
+```
+
+AgentLint loads this file automatically. Use `--agentlint-config PATH` to select a
+different file.
+
+Policy precedence is:
+
+1. the test's `@pytest.mark.agentlint` policy;
+2. the first matching route;
+3. `--agentlint-policy`; and
+4. `default_policy` from the routing file.
+
+If a captured test has no matching policy, the AgentLint step fails and names the test.
+
+Set a different artifact base directory with:
+
+```bash
+pytest --agentlint --agentlint-output build/agentlint-runs
+```
 
 ### In-process capture
 

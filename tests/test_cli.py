@@ -22,6 +22,7 @@ def test_help_exits_successfully() -> None:
     assert "import" in result.output
     assert "policy" in result.output
     assert "check" in result.output
+    assert "check-run" in result.output
     assert "explain" in result.output
     assert "validate" in result.output
 
@@ -343,6 +344,13 @@ def test_check_rejects_invalid_fail_on_choice() -> None:
 
     assert result.exit_code != 0
     assert "invalid" in (result.stdout + result.stderr).lower()
+
+
+def test_check_run_reports_missing_manifest() -> None:
+    result = runner.invoke(app, ["check-run", "missing-run"])
+
+    assert result.exit_code == 1
+    assert "pytest run manifest not found" in result.stderr
 
 
 def test_explain_succeeds_for_known_code() -> None:
