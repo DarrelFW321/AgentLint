@@ -1,254 +1,262 @@
 # AgentLint
 
-AgentLint is an offline, deterministic CI policy checker for recorded AI agent execution traces.
+[![CI](https://github.com/DarrelFW321/AgentLint/actions/workflows/ci.yml/badge.svg)](https://github.com/DarrelFW321/AgentLint/actions/workflows/ci.yml)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 
-It will import traces from agent frameworks and observability systems, normalize them into an AgentLint intermediate representation, and detect policy violations involving tool use, data flow, approvals, and final-answer provenance.
+AgentLint catches unsafe agent behavior before it reaches production.
 
-AgentLint answers one bounded question:
+It records agent test runs and checks them against your policy for:
 
-> Did this recorded agent run violate a developer-defined policy that can be verified from the captured evidence?
+- unauthorized or unknown tool calls;
+- destructive actions without approval;
+- private data flowing to public destinations;
+- untrusted data influencing privileged actions; and
+- final-answer claims without recorded evidence.
 
-It analyzes explicit trace facts and relationships. It does not infer arbitrary Python data flow, judge whether natural-language claims are true, authorize production actions, or prove that an agent is universally safe. When a policy requires evidence that the trace did not capture, AgentLint reports `not_verifiable` instead of a pass.
+AgentLint is deterministic and runs locally. It evaluates the evidence in a completed
+trace; it does not send traces to a model or external analysis service.
 
-## Product Scope
+## Quick start
 
-The initial product is a developer test and CI tool:
-
-```text
-run agent scenarios
-  -> collect traces
-  -> normalize explicit evidence
-  -> check deterministic policies
-  -> emit compiler-style diagnostics and a CI result
-```
-
-In scope:
-
-1. Importing supported completed traces.
-2. Structural trace validation.
-3. Deterministic checks over explicit tool, approval, data-flow, and provenance evidence.
-4. Capture-completeness assessment and `not_verifiable` outcomes.
-5. Human-readable and machine-readable CI reports.
-
-Outside the initial scope:
-
-1. Runtime authorization, action blocking, or approval user interfaces.
-2. General-purpose observability, trace storage, or security dashboards.
-3. Universal runtime taint tracking or natural-language data-flow inference.
-4. Semantic fact-checking, subjective answer grading, or general LLM evaluation.
-5. Enterprise identity, role, compliance, or policy-administration systems.
-
-## Status
-
-AgentLint has completed Milestone 11 scope alignment. The repository currently contains native AgentLint IR v1, structural and policy checks, a shared compiled rule/evidence plan, policy-specific evidence requirements, `not_verifiable` outcomes, report v4 diagnostic paths, a curated fixture corpus, a generic OpenTelemetry importer, and a first-class Python OpenAI Agents SDK capture adapter with semantic helpers and optional pytest integration.
-
-## Development
-
-Preferred workflow:
-
-```bash
-uv run agentlint --help
-uv run agentlint version
-uv run agentlint doctor
-uv run agentlint validate examples/traces/structural_valid_tool_flow.json
-uv run agentlint policy validate examples/policies/customer_support.yaml
-uv run agentlint validate examples/traces/structural_valid_tool_flow.json --policy examples/policies/customer_support.yaml
-uv run agentlint check examples/traces/policy_unknown_tool.json --policy examples/policies/policy_checks.yaml
-uv run agentlint check examples/traces/policy_unknown_tool.json --policy examples/policies/policy_checks.yaml --format json
-uv run agentlint import opentelemetry examples/external/opentelemetry/missing_approval.json --output examples/generated/otel_missing_approval.agentlint.json
-uv run agentlint explain UNKNOWN_TOOL
-uv run pytest
-```
-
-Fallback workflow after installing the project in a Python environment:
-
-```bash
-python -m agentlint --help
-python -m agentlint validate examples/traces/structural_valid_tool_flow.json
-python -m agentlint policy validate examples/policies/customer_support.yaml
-python -m agentlint check examples/traces/policy_tool_valid.json --policy examples/policies/policy_checks.yaml
-python -m agentlint import opentelemetry examples/external/opentelemetry/missing_approval.json --output examples/generated/otel_missing_approval.agentlint.json
-python -m pytest
-```
-
-On Windows, if the default `python` is not Python 3.12 or newer, use the launcher:
-
-```bash
-py -3.12 -m agentlint --help
-py -3.12 -m agentlint validate examples/traces/structural_valid_tool_flow.json
-py -3.12 -m agentlint policy validate examples/policies/customer_support.yaml
-py -3.12 -m agentlint check examples/traces/policy_tool_valid.json --policy examples/policies/policy_checks.yaml
-py -3.12 -m agentlint import opentelemetry examples/external/opentelemetry/missing_approval.json --output examples/generated/otel_missing_approval.agentlint.json
-py -3.12 -m agentlint import openai-agents examples/external/openai_agents/function_handoff_guardrail.json --output examples/generated/openai_function_handoff_guardrail.agentlint.json
-py -3.12 -m pytest
-```
-
-AgentLint targets Python 3.12 or newer.
-
-## Current CLI
-
-```bash
-agentlint --help
-agentlint version
-agentlint doctor
-agentlint validate examples/traces/structural_valid_tool_flow.json
-agentlint policy validate examples/policies/customer_support.yaml
-agentlint validate examples/traces/structural_valid_tool_flow.json --policy examples/policies/customer_support.yaml
-agentlint check examples/traces/policy_tool_valid.json --policy examples/policies/policy_checks.yaml
-agentlint check examples/traces/policy_unknown_tool.json --policy examples/policies/policy_checks.yaml --format json
-agentlint check examples/traces/policy_sensitive_final_answer.json --policy examples/policies/policy_checks.yaml --fail-on warning
-agentlint import opentelemetry examples/external/opentelemetry/missing_approval.json --output examples/generated/otel_missing_approval.agentlint.json
-agentlint explain UNKNOWN_TOOL
-```
-
-`agentlint validate` currently validates native AgentLint IR v1 JSON traces, then runs structural validation and prints stable diagnostic codes for structural failures.
-
-`agentlint policy validate` validates YAML policy files. `agentlint validate TRACE.json --policy POLICY.yaml` validates the policy, validates the trace structurally, then runs offline policy checks for tool use, approvals, explicit data flow, and final-answer provenance.
-
-Policy validation also prints the checks activated by the policy and their inferred minimum evidence requirements. Focused policies activate checks from the constructs they configure; provenance checks require explicit activation rather than silently applying to every policy.
-
-Starter policies are available for focused adoption:
+AgentLint's supported workflow is:
 
 ```text
-examples/policies/starter_tools.yaml
-examples/policies/starter_approval.yaml
-examples/policies/starter_data_flow.yaml
-examples/policies/starter_provenance.yaml
+define a policy -> install the framework integration -> run your existing tests
 ```
 
-Policies can classify observed tool boundaries once without adding per-call annotations:
+### 1. Install
+
+AgentLint currently requires Python 3.12 or newer. Install the project and the OpenAI
+Agents integration from source:
+
+```bash
+git clone https://github.com/DarrelFW321/AgentLint.git
+cd AgentLint
+python -m pip install -e ".[openai-agents]"
+```
+
+### 2. Define a policy
+
+Create `agentlint.yaml`:
+
+```yaml
+version: 1
+policy_id: customer_support
+
+tools:
+  lookup_status:
+    permission: allowed
+    approval: not_required
+    risk: low
+
+  issue_refund:
+    permission: allowed
+    approval: not_required
+    risk: high
+    arguments:
+      ticket_id:
+        required: true
+        allowed_types: [string]
+
+rules:
+  unknown_tool: error
+  denied_tool_call: error
+  disallowed_tool_argument: error
+```
+
+Only configure the rules that matter to your agent. AgentLint derives the evidence
+requirements from the active policy and reports `not_verifiable` when the trace does
+not contain enough evidence to reach a trustworthy result.
+
+Validate the policy at any time:
+
+```bash
+agentlint policy validate agentlint.yaml
+```
+
+### 3. Run your tests
+
+For an OpenAI Agents SDK project using pytest:
+
+```bash
+pytest --agentlint --agentlint-policy agentlint.yaml
+```
+
+The plugin captures OpenAI Agents traces for the test session, evaluates them locally,
+prints diagnostics, and returns a nonzero exit code for violations, invalid traces,
+missing capture, or unverifiable policy requirements.
+
+No collector, hosted tracing backend, custom trace format, or per-tool wrapper is
+required.
+
+Tool permission and argument checks work from framework capture plus policy alone.
+Checks for application concepts the framework cannot observe, such as an approval
+decision, need one focused semantic record at that boundary.
+
+## In-process integration
+
+Applications that do not use the pytest plugin can install capture once:
+
+```python
+from agentlint.integrations.openai_agents import instrument
+
+session = instrument(".agentlint/openai-agents")
+
+try:
+    # Run ordinary OpenAI Agents SDK workflows.
+    ...
+finally:
+    session.close()
+```
+
+The default `additive` mode preserves the SDK's existing trace processors. In an
+isolated test process, `export_mode="local_only"` replaces them so traces remain
+local:
+
+```python
+session = instrument(
+    ".agentlint/openai-agents",
+    export_mode="local_only",
+)
+```
+
+Use `local_only` deliberately: replacing the SDK processors also disables any
+existing hosted OpenAI trace export in that process.
+
+## Policy-declared boundaries
+
+Classify a tool result or argument once in policy instead of annotating every call:
 
 ```yaml
 tools:
   customer_db.lookup:
+    permission: allowed
     result:
       source: customer_profile
       sensitivity: private
       trust: trusted
+
   web_search:
+    permission: allowed
     arguments:
       query:
         sink: public_search
         visibility: public
 ```
 
-AgentLint applies these labels to captured tool results and arguments before policy evaluation. Boundary declarations do not create `data_flow` edges or prove that one value influenced another. A flow check requires an explicit relationship from the framework, adapter, or application; otherwise required data-flow evidence remains incomplete and can produce `not_verifiable`.
+AgentLint applies these labels to captured calls and results. A data-flow rule still
+requires an explicit recorded relationship showing that a source influenced a sink.
+AgentLint never invents flow from event order or matching text.
 
-`agentlint check` emits text or JSON reports for one or more explicit trace files. Use `--fail-on error|warning|info|never` to control CI exit behavior. Reports omit raw trace payload values by default and include redaction metadata.
+Framework tracing cannot always observe authoritative approval decisions or
+application-level data flow. For those cases, the OpenAI integration provides focused
+semantic helpers such as `record_current_approval`, `record_current_source`, and
+`record_current_sink`. They record labels and relationships without storing the
+sensitive values themselves.
 
-`agentlint import opentelemetry` imports a supported OTLP-style JSON trace into native AgentLint IR. The importer expects explicit `agentlint.*` span attributes for agent semantics such as event type, event ID, tool name, source labels, sink labels, data-flow targets, approvals, and final-answer claims. Import warnings describe spans or relationships that could not be mapped precisely.
-
-Imported traces preserve a per-trace capture completeness profile through normalization. Report schema v2 states whether relevant evidence was captured, partial, unavailable, or unknown, and passing incomplete traces explicitly limit the verification claim. See `Documents/milestone_8_build_report.md`.
-
-The OpenTelemetry demo path is fully offline:
-
-```bash
-python examples/opentelemetry/generate_demo_trace.py
-agentlint import opentelemetry examples/external/opentelemetry/demo_missing_approval.json --output examples/generated/otel_missing_approval.agentlint.json
-agentlint check examples/generated/otel_missing_approval.agentlint.json --policy examples/policies/policy_checks.yaml
-```
-
-There is also an optional SDK-backed demo that uses the real OpenTelemetry SDK while still making no network calls:
-
-```bash
-pip install -e .[otel-demo]
-python examples/opentelemetry/generate_sdk_demo_trace.py
-agentlint import opentelemetry examples/external/opentelemetry/sdk_demo_missing_approval.json --output examples/generated/otel_sdk_demo_missing_approval.agentlint.json
-agentlint check examples/generated/otel_sdk_demo_missing_approval.agentlint.json --policy examples/policies/policy_checks.yaml
-```
-
-For a fuller local support-agent run:
-
-```bash
-python examples/opentelemetry/support_agent_demo.py
-agentlint import opentelemetry examples/external/opentelemetry/support_agent_demo.json --output examples/generated/support_agent_demo.agentlint.json
-agentlint check examples/generated/support_agent_demo.agentlint.json --policy examples/policies/policy_checks.yaml
-```
-
-That script uses real OpenTelemetry SDK spans to simulate a support workflow with private account data, a public web-search leak, and an email sent without approval. It is still fully local and costs nothing to run.
-
-For an agent-shaped local run with a deterministic planner and local Python tools:
-
-```bash
-python examples/opentelemetry/local_agent_demo.py
-agentlint import opentelemetry examples/external/opentelemetry/local_agent_demo.json --output examples/generated/local_agent_demo.agentlint.json
-agentlint check examples/generated/local_agent_demo.agentlint.json --policy examples/policies/policy_checks.yaml
-```
-
-This is not an LLM-backed agent, but it exercises an actual agent control loop: prompt, planning, tool calls, tool results, and final answer.
-
-## OpenAI Agents SDK
-
-Install the optional integration:
-
-```powershell
-py -3.12 -m pip install -e ".[openai-agents]"
-```
-
-For one-line in-process capture:
-
-```python
-from agentlint.integrations.openai_agents import instrument
-
-session = instrument(".agentlint/openai-agents")
-# Run ordinary OpenAI Agents SDK workflows.
-session.close()
-```
-
-`export_mode="additive"` preserves the SDK's existing trace processors. Use `export_mode="local_only"` only in an isolated test process when AgentLint should replace existing processors and avoid hosted trace export.
-
-For pytest:
-
-```powershell
-pytest --agentlint --agentlint-policy examples/policies/openai_function_tools.yaml
-```
-
-Capture begins only when `--agentlint` is supplied. A requested session that captures no supported traces fails instead of reporting a clean policy result.
-
-Policies may require minimum evidence levels:
+For example, require approval in policy:
 
 ```yaml
-capture:
-  require:
-    tool_calls: partial
-    approvals: partial
+tools:
+  issue_refund:
+    permission: allowed
+    approval: required
+    risk: high
+
+rules:
+  missing_approval: error
 ```
 
-AgentLint also infers minimum evidence from configured policy constructs. A structurally valid trace with no known violation is `not_verifiable` when required evidence is unavailable or unknown. Invalid and not-verifiable traces fail CLI and pytest independently of `--fail-on`.
+Then record the application's decision inside the active function-tool span:
 
-The zero-cost SDK demo creates real SDK spans without a model call:
-
-```powershell
-py -3.12 examples/openai_agents/sdk_trace_demo.py
-agentlint import openai-agents <printed-snapshot-path> --output openai-demo.agentlint.json
-agentlint check openai-demo.agentlint.json --policy examples/policies/policy_checks.yaml
+```python
+session.record_current_approval(decision="approved")
 ```
 
-`examples/openai_agents/live_agent_demo.py` is an optional API-backed demo. It requires `OPENAI_API_KEY`, uses one short run and one local function tool, and is never run by the default test suite.
+## Diagnostics
 
-`examples/openai_agents/live_policy_agent/` runs three actual API-backed agent workflows and demonstrates an approved tool pass, an unknown-tool failure, and a not-verifiable evidence result. Its tools are synthetic and local, and generated snapshots are ignored by Git.
+AgentLint produces compiler-style failures with stable codes and evidence paths:
 
-OpenAI Agents tracing does not automatically expose authoritative general approval decisions, AgentLint data-flow/provenance semantics, or `RunResult.final_output`. Reports show those limitations through M8 capture completeness instead of implying they were verified.
+```text
+error[PRIVATE_TO_PUBLIC_SINK]
 
-For SDK 0.18.x, AgentLint recognizes both `generation` and `response` model-call spans. It also treats SDK `task` and `turn` custom spans as transparent hierarchy containers, preserving parent relationships without reporting them as unsupported application events.
+Private data from customer_profile flowed into web_search.query.
 
-## Fixture Corpus
-
-The curated fixture corpus is indexed by `examples/fixtures/manifest.yaml`. The manifest records each canonical trace, optional policy, expected status, expected diagnostic codes, report coverage, redaction expectations, and performance-smoke membership.
-
-When adding a new diagnostic code or behavior check:
-
-1. Add or update a trace under `examples/traces/`.
-2. Add a manifest entry with the expected diagnostic code.
-3. Add a JSON golden under `examples/expected_reports/` when report output is part of the behavior.
-4. Run `py -3.12 -m pytest tests\test_fixture_corpus.py`.
-
-The corpus tests enforce that every current diagnostic code has fixture coverage and that representative JSON reports are deterministic.
-
-The zero-cost M10 customer-support workflow demonstrates passing, failed, and not-verifiable outcomes with real SDK trace objects:
-
-```powershell
-py -3.12 examples\openai_agents\customer_support\demo.py
+Path:
+customer_db.lookup.result
+-> web_search.query
 ```
 
-See `Documents/milestone_10_build_report.md`. Additional framework adapters, including a likely LangGraph adapter, follow after the evidence contract is evaluated against real projects.
+Core checks include:
+
+| Area | Checks |
+| --- | --- |
+| Tools | `UNKNOWN_TOOL`, `DENIED_TOOL_CALL`, `DISALLOWED_TOOL_ARGUMENT` |
+| Approval | `MISSING_APPROVAL`, `APPROVAL_AFTER_ACTION`, `ACTION_AFTER_DENIAL`, `APPROVAL_MISMATCH` |
+| Data flow | `PRIVATE_TO_PUBLIC_SINK`, `SECRET_EXPOSURE`, `UNTRUSTED_TO_PRIVILEGED_ACTION`, `SENSITIVE_FINAL_ANSWER` |
+| Provenance | `UNSUPPORTED_CLAIM`, `INVALID_PROVENANCE_REFERENCE`, `EVIDENCE_AFTER_CLAIM` |
+
+Run `agentlint explain CODE` for a rule description and remediation guidance.
+
+## Checking recorded traces
+
+The CLI can also evaluate existing native AgentLint traces:
+
+```bash
+agentlint check trace.agentlint.json --policy agentlint.yaml
+agentlint check traces/*.agentlint.json --policy agentlint.yaml --format json
+```
+
+Use `--fail-on error|warning|info|never` to control the diagnostic severity threshold.
+Invalid and `not_verifiable` traces fail independently of that threshold.
+
+Reports redact raw payload values by default and include:
+
+- the policy result for each trace;
+- capture completeness and unmet evidence requirements;
+- stable diagnostic codes;
+- related event identifiers and explicit evidence paths; and
+- aggregate counts suitable for CI.
+
+## Advanced: OpenTelemetry import
+
+OpenTelemetry support remains available as a compatibility path for systems that
+already export OTLP-style JSON:
+
+```bash
+agentlint import opentelemetry trace.json --output trace.agentlint.json
+agentlint check trace.agentlint.json --policy agentlint.yaml
+```
+
+This is not the recommended onboarding path. Generic OpenTelemetry spans do not carry
+enough agent-policy meaning on their own, so precise checks require explicit
+`agentlint.*` semantic attributes. First-class framework integrations provide a
+better consumer experience.
+
+## What AgentLint guarantees
+
+AgentLint answers:
+
+> Did this recorded agent run violate a developer-defined policy that can be verified
+> from the captured evidence?
+
+It does not authorize production actions, collect approvals, reconstruct arbitrary
+program data flow, judge the semantic truth of natural-language answers, or prove that
+an agent is universally safe. Missing evidence is reported explicitly rather than
+treated as a pass.
+
+## Development
+
+```bash
+python -m pip install -e ".[dev,otel-demo,openai-agents]"
+python -m ruff format --check src tests
+python -m ruff check src tests
+python -m pytest -q
+```
+
+The test suite is offline and zero-cost by default. API-backed examples require
+`OPENAI_API_KEY` and are excluded from normal test runs.
+
+## License
+
+AgentLint is available under the MIT License.
