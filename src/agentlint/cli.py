@@ -12,6 +12,7 @@ import typer
 from agentlint.adapters.openai_agents import import_openai_agents_file
 from agentlint.adapters.openai_snapshot import OpenAISnapshotError
 from agentlint.adapters.opentelemetry import OpenTelemetryImportError, import_opentelemetry_file
+from agentlint.capture_checking import CaptureCheckError, check_capture
 from agentlint.checking import check_trace_file
 from agentlint.diagnostics import Severity, explain_diagnostic_code, format_diagnostics
 from agentlint.integrations.pytest_runs import check_run
@@ -113,6 +114,41 @@ def check(
     else:
         typer.echo(render_text_report(report))
 
+    if report_should_fail(report):
+        raise typer.Exit(1)
+
+
+@app.command("check-capture")
+def check_capture_path(
+    capture_path: Annotated[
+        Path,
+        typer.Argument(help="Captured trace JSON file or directory."),
+    ],
+    policy_path: Annotated[
+        Path,
+        typer.Option("--policy", help="AgentLint YAML policy file to evaluate."),
+    ],
+    report_format: Annotated[
+        ReportFormat,
+        typer.Option("--format", help="Report output format."),
+    ] = ReportFormat.TEXT,
+    fail_on: Annotated[
+        FailOn,
+        typer.Option("--fail-on", help="Diagnostic severity threshold for exit code."),
+    ] = FailOn.ERROR,
+) -> None:
+    """Detect and check captured traces without intermediate conversion files."""
+    policy = _load_policy_for_cli(policy_path)
+    try:
+        report = check_capture(capture_path, policy=policy, fail_on=fail_on)
+    except CaptureCheckError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(1) from exc
+
+    if report_format == ReportFormat.JSON:
+        typer.echo(render_json_report(report))
+    else:
+        typer.echo(render_text_report(report))
     if report_should_fail(report):
         raise typer.Exit(1)
 

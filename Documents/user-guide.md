@@ -22,7 +22,7 @@ Choose either workflow:
 | Workflow | Capture | Check |
 | --- | --- | --- |
 | Pytest | Automatic during tests | Automatic after the test session |
-| Python runner | `instrument()` | Import and check snapshots with the CLI |
+| Python runner | `instrument()` | `agentlint check-capture` |
 
 ### Pytest workflow
 
@@ -143,7 +143,21 @@ finally:
     snapshot_paths = session.close()
 ```
 
-Snapshots are written to `.agentlint/openai-agents/`. Import and check a snapshot:
+Snapshots are written to `.agentlint/openai-agents/`. Check all snapshots in the
+directory:
+
+```bash
+agentlint check-capture .agentlint/openai-agents --policy agentlint.yaml
+```
+
+The command accepts a single JSON file or a directory of JSON files. It detects OpenAI
+Agents snapshots, OpenTelemetry exports, and native AgentLint traces and returns one
+combined report.
+
+#### Inspecting normalized traces
+
+Use the split commands when developing an adapter, inspecting normalized IR, or
+keeping the converted trace:
 
 ```bash
 agentlint import openai-agents \
@@ -151,8 +165,6 @@ agentlint import openai-agents \
   --output trace.agentlint.json
 agentlint check trace.agentlint.json --policy agentlint.yaml
 ```
-
-Repeat the import/check step for each snapshot produced by the run.
 
 The default `export_mode="additive"` preserves the SDK's existing trace processors.
 Use local-only capture in an isolated test process when hosted trace export is not
@@ -329,6 +341,12 @@ Supported thresholds are `error`, `warning`, `info`, and `never`.
 
 OpenTelemetry import is an advanced fallback for systems that already export
 OTLP-style JSON:
+
+```bash
+agentlint check-capture traces/ --policy agentlint.yaml
+```
+
+To inspect the normalized trace, use the split commands:
 
 ```bash
 agentlint import opentelemetry trace.json --output trace.agentlint.json

@@ -78,14 +78,14 @@ session = instrument(".agentlint/openai-agents")
 snapshot_paths = session.close()
 ```
 
-Import and check each snapshot:
+Check the capture directory:
 
 ```bash
-agentlint import openai-agents \
-  .agentlint/openai-agents/<trace-id>.openai-agents.json \
-  --output trace.agentlint.json
-agentlint check trace.agentlint.json --policy agentlint.yaml
+agentlint check-capture .agentlint/openai-agents --policy agentlint.yaml
 ```
+
+`check-capture` also accepts one JSON file and detects OpenAI Agents, OpenTelemetry,
+and native AgentLint formats.
 
 ## Sample output
 

@@ -22,6 +22,7 @@ def test_help_exits_successfully() -> None:
     assert "import" in result.output
     assert "policy" in result.output
     assert "check" in result.output
+    assert "check-capture" in result.output
     assert "check-run" in result.output
     assert "explain" in result.output
     assert "validate" in result.output
@@ -351,6 +352,36 @@ def test_check_run_reports_missing_manifest() -> None:
 
     assert result.exit_code == 1
     assert "pytest run manifest not found" in result.stderr
+
+
+def test_check_capture_detects_and_checks_native_trace() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "check-capture",
+            str(TRACE_DIR / "policy_tool_valid.json"),
+            "--policy",
+            str(POLICY_DIR / "openai_function_tools.yaml"),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "traces: 1 passed, 0 failed, 0 not verifiable, 0 invalid" in result.stdout
+
+
+def test_check_capture_reports_missing_path() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "check-capture",
+            "missing-capture",
+            "--policy",
+            str(POLICY_DIR / "openai_function_tools.yaml"),
+        ],
+    )
+
+    assert result.exit_code == 1
+    assert "capture path not found" in result.stderr
 
 
 def test_explain_succeeds_for_known_code() -> None:

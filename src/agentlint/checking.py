@@ -110,7 +110,7 @@ def check_trace_file(path: str | Path, policy: Policy | None = None) -> TraceChe
     try:
         trace = load_native_trace(trace_path)
     except TraceSchemaError as exc:
-        return _invalid_trace_result(
+        return invalid_trace_result(
             trace_path,
             InputError(
                 kind=InputErrorKind.SCHEMA,
@@ -120,13 +120,13 @@ def check_trace_file(path: str | Path, policy: Policy | None = None) -> TraceChe
             policy,
         )
     except TraceJsonError as exc:
-        return _invalid_trace_result(
+        return invalid_trace_result(
             trace_path,
             InputError(kind=InputErrorKind.JSON, message=str(exc)),
             policy,
         )
     except (TraceFileError, TraceLoadError) as exc:
-        return _invalid_trace_result(
+        return invalid_trace_result(
             trace_path,
             InputError(kind=InputErrorKind.FILE, message=str(exc)),
             policy,
@@ -135,11 +135,12 @@ def check_trace_file(path: str | Path, policy: Policy | None = None) -> TraceChe
     return check_trace(trace, policy=policy, trace_path=str(trace_path))
 
 
-def _invalid_trace_result(
+def invalid_trace_result(
     trace_path: Path,
     input_error: InputError,
     policy: Policy | None,
 ) -> TraceCheckResult:
+    """Represent an input failure as a normal check result."""
     return TraceCheckResult(
         trace_path=str(trace_path),
         policy_id=policy.policy_id if policy is not None else None,
