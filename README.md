@@ -17,7 +17,7 @@ sensitive-data flows, and unsupported claims.
 ## Install
 
 ```bash
-python -m pip install "agentlint-trace[openai-agents]==0.1.0a1"
+python -m pip install "agentlint-trace[openai-agents]==0.1.0a2"
 ```
 
 AgentLint requires Python 3.12 or newer.
@@ -62,7 +62,7 @@ Artifacts are written to `.agentlint/runs/`.
 agentlint check-run .agentlint/runs/latest.json
 ```
 
-Use a [test marker or routing file](Documents/user-guide.md#policy-selection) when
+Use a [test marker or routing file](https://github.com/DarrelFW321/AgentLint/blob/main/Documents/user-guide.md#policy-selection) when
 tests require different policies.
 
 ### Any Python runner
@@ -102,10 +102,10 @@ error[DENIED_TOOL_CALL]: tool call "evt_delete_account" uses tool
 
 ## Documentation
 
-- [User guide](Documents/user-guide.md)
-- [Examples](examples/)
-- [OpenTelemetry compatibility](Documents/user-guide.md#opentelemetry-compatibility)
+- [User guide](https://github.com/DarrelFW321/AgentLint/blob/main/Documents/user-guide.md)
+- [Examples](https://github.com/DarrelFW321/AgentLint/tree/main/examples)
+- [OpenTelemetry compatibility](https://github.com/DarrelFW321/AgentLint/blob/main/Documents/user-guide.md#opentelemetry-compatibility)
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/DarrelFW321/AgentLint/blob/main/LICENSE)

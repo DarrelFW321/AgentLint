@@ -2,6 +2,13 @@
 
 All notable changes to AgentLint are recorded here.
 
+## 0.1.0a2 - 2026-07-14
+
+### Fixed
+
+- Use absolute repository links in the package README so documentation, examples,
+  and license links work on PyPI.
+
 ## 0.1.0a1 - 2026-07-14
 
 First public alpha of the `agentlint-trace` package.

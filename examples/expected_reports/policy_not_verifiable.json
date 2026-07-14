@@ -1,6 +1,6 @@
 {
   "schema_version": "agentlint.report.v4",
-  "agentlint_version": "0.1.0a1",
+  "agentlint_version": "0.1.0a2",
   "summary": {
     "trace_count": 1,
     "passed": 0,

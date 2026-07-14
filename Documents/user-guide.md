@@ -12,7 +12,7 @@ and advanced trace import.
 Install AgentLint with the OpenAI Agents integration:
 
 ```bash
-python -m pip install "agentlint-trace[openai-agents]==0.1.0a1"
+python -m pip install "agentlint-trace[openai-agents]==0.1.0a2"
 ```
 
 The distribution is named `agentlint-trace`; the command and Python package remain
