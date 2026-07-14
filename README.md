@@ -3,48 +3,17 @@
 [![CI](https://github.com/DarrelFW321/AgentLint/actions/workflows/ci.yml/badge.svg)](https://github.com/DarrelFW321/AgentLint/actions/workflows/ci.yml)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 
-AgentLint checks recorded agent runs against project policies. Use it in tests and CI
-to catch unsafe tool use, missing approvals, sensitive-data flows, and unsupported
-claims.
+AgentLint checks recorded agent runs for unsafe tool use, missing approvals,
+sensitive-data flows, and unsupported claims.
 
 ## Integrations
 
-| Integration | Setup | Use case |
-| --- | --- | --- |
-| OpenAI Agents SDK | pytest plugin or one-line `instrument()` call | Recommended |
-| OpenTelemetry | Import OTLP-style JSON | Existing tracing pipelines |
+| Integration | Workflow |
+| --- | --- |
+| OpenAI Agents SDK | Automatic pytest capture or `instrument()` in any Python runner |
+| OpenTelemetry | Import existing OTLP-style JSON |
 
-### OpenAI Agents SDK
-
-The pytest integration captures agent runs executed by existing tests without code
-changes. The quick start below shows the complete command.
-
-For scripts or another test runner, add capture once at process startup:
-
-```python
-from agentlint.integrations.openai_agents import instrument
-
-session = instrument(".agentlint/openai-agents")
-
-# Run the agent.
-
-session.close()
-```
-
-No per-tool wrappers or tracing backend are required. See the
-[integration guide](Documents/user-guide.md#openai-agents-integration) for local-only
-capture and approval or data-flow helpers.
-
-### OpenTelemetry
-
-Projects with an existing OpenTelemetry pipeline can import OTLP-style JSON. See
-[OpenTelemetry compatibility](Documents/user-guide.md#opentelemetry-compatibility).
-
-## Quick start
-
-### 1. Install
-
-AgentLint currently supports Python 3.12+ and the OpenAI Agents SDK:
+## Install
 
 ```bash
 git clone https://github.com/DarrelFW321/AgentLint.git
@@ -52,7 +21,9 @@ cd AgentLint
 python -m pip install -e ".[openai-agents]"
 ```
 
-### 2. Define a policy
+AgentLint requires Python 3.12 or newer.
+
+## Define a policy
 
 Create `agentlint.yaml`:
 
@@ -64,12 +35,10 @@ tools:
   lookup_status:
     permission: allowed
     approval: not_required
-    risk: low
 
   issue_refund:
     permission: allowed
     approval: required
-    risk: high
 
 rules:
   unknown_tool: error
@@ -77,47 +46,53 @@ rules:
   missing_approval: error
 ```
 
-### 3. Run your tests
+## Run
+
+Pytest is optional. Choose the workflow that fits the project.
+
+### Pytest
 
 ```bash
 pytest --agentlint --agentlint-policy agentlint.yaml
 ```
 
-AgentLint captures supported agent runs, evaluates the policy, prints diagnostics, and
-returns a nonzero exit code for policy violations or incomplete traces.
-
-Each run is saved under `.agentlint/runs/` with its traces, selected policies, and a
-manifest. Recheck the latest run without rerunning pytest:
+The command runs the tests, captures their agent traces, and checks the saved run.
+Artifacts are written to `.agentlint/runs/`.
 
 ```bash
 agentlint check-run .agentlint/runs/latest.json
 ```
 
-Pytest receives test paths, not trace JSON paths. The integration creates the trace
-files while those tests run.
+Use a [test marker or routing file](Documents/user-guide.md#policy-selection) when
+tests require different policies.
 
-`--agentlint-policy` sets the default policy. Tests that need another policy can select
-one directly:
+### Any Python runner
 
 ```python
-@pytest.mark.agentlint(policy="policies/refunds.yaml")
-def test_refund_agent():
-    ...
+from agentlint.integrations.openai_agents import instrument
+
+session = instrument(".agentlint/openai-agents")
+
+# Run the agent.
+
+snapshot_paths = session.close()
 ```
 
-For larger suites, route test paths to policies in `agentlint.pytest.yaml`. See
-[policy selection](Documents/user-guide.md#policy-selection).
+Import and check each snapshot:
+
+```bash
+agentlint import openai-agents \
+  .agentlint/openai-agents/<trace-id>.openai-agents.json \
+  --output trace.agentlint.json
+agentlint check trace.agentlint.json --policy agentlint.yaml
+```
 
 ## Sample output
-
-A policy violation produces a stable diagnostic code and a suggested fix:
 
 ```text
 AgentLint Report
 traces: 0 passed, 1 failed, 0 not verifiable, 0 invalid
 diagnostics: 1 error, 0 warning, 0 info
-
-status: failed
 
 error[DENIED_TOOL_CALL]: tool call "evt_delete_account" uses tool
 "delete_account" denied by trace policy
@@ -128,9 +103,9 @@ error[DENIED_TOOL_CALL]: tool call "evt_delete_account" uses tool
 
 ## Documentation
 
-- [User guide](Documents/user-guide.md) — setup, integrations, policies, results, and
-  CI behavior.
-- [Examples](examples/) — policies, traces, expected reports, and runnable integrations.
+- [User guide](Documents/user-guide.md)
+- [Examples](examples/)
+- [OpenTelemetry compatibility](Documents/user-guide.md#opentelemetry-compatibility)
 
 ## License
 

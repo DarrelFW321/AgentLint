@@ -6,7 +6,7 @@ and advanced trace import.
 ## Requirements
 
 - Python 3.12 or newer
-- pytest for the automatic test integration
+- pytest, only when using the pytest workflow
 - OpenAI Agents SDK 0.18.x for the supported framework integration
 
 Install from the repository:
@@ -17,7 +17,14 @@ python -m pip install -e ".[openai-agents]"
 
 ## OpenAI Agents integration
 
-### Pytest
+Choose either workflow:
+
+| Workflow | Capture | Check |
+| --- | --- | --- |
+| Pytest | Automatic during tests | Automatic after the test session |
+| Python runner | `instrument()` | Import and check snapshots with the CLI |
+
+### Pytest workflow
 
 Run existing tests with AgentLint enabled:
 
@@ -25,26 +32,14 @@ Run existing tests with AgentLint enabled:
 pytest --agentlint --agentlint-policy agentlint.yaml
 ```
 
-The plugin:
-
-1. activates local capture for the test session;
-2. associates captured traces with pytest tests;
-3. selects a policy for each test;
-4. writes a run manifest with the traces and policies;
-5. checks the saved run with the standard AgentLint engine; and
-6. prints the report in the pytest summary.
-
-Capture is activated only when `--agentlint` is present. Captured test traces stay
-local.
+This command runs the selected tests, captures their agent traces, checks each trace
+with its selected policy, and prints the report in the pytest summary.
 
 Specify pytest test paths as usual:
 
 ```bash
 pytest tests/test_refunds.py --agentlint --agentlint-policy policies/refunds.yaml
 ```
-
-Trace JSON paths are not passed to pytest. The integration creates them from agent
-runs executed by the selected tests.
 
 ### Run artifacts
 
@@ -132,9 +127,9 @@ Set a different artifact base directory with:
 pytest --agentlint --agentlint-output build/agentlint-runs
 ```
 
-### In-process capture
+### Python runners
 
-For applications that do not use the pytest plugin:
+Use `instrument()` with a script, custom test runner, or application process:
 
 ```python
 from agentlint.integrations.openai_agents import instrument
@@ -145,8 +140,19 @@ try:
     # Run ordinary OpenAI Agents SDK workflows.
     ...
 finally:
-    session.close()
+    snapshot_paths = session.close()
 ```
+
+Snapshots are written to `.agentlint/openai-agents/`. Import and check a snapshot:
+
+```bash
+agentlint import openai-agents \
+  .agentlint/openai-agents/<trace-id>.openai-agents.json \
+  --output trace.agentlint.json
+agentlint check trace.agentlint.json --policy agentlint.yaml
+```
+
+Repeat the import/check step for each snapshot produced by the run.
 
 The default `export_mode="additive"` preserves the SDK's existing trace processors.
 Use local-only capture in an isolated test process when hosted trace export is not
